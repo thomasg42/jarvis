@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cortana — Chat</title>
+  <style>
+    :root { --blue: #2fbf7f; --ink: #1c1c1e; --muted: #6b6b70; --bg: #f5f5f7; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0; background: var(--bg); color: var(--ink);
+      display: flex; flex-direction: column; height: 100vh;
+    }
+    header { padding: 16px 20px; background: #fff; border-bottom: 1px solid #e5e5e7; }
+    header h1 { font-size: 18px; margin: 0; }
+    header .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    #log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; line-height: 1.45; font-size: 15px; white-space: pre-wrap; }
+    .msg.thomas { align-self: flex-end; background: var(--blue); color: #fff; border-bottom-right-radius: 4px; }
+    .msg.jarvis { align-self: flex-start; background: #fff; border: 1px solid #e5e5e7; border-bottom-left-radius: 4px; }
+    .msg.system { align-self: center; color: var(--muted); font-size: 13px; background: none; }
+    form { display: flex; gap: 8px; padding: 12px; background: #fff; border-top: 1px solid #e5e5e7; }
+    textarea { flex: 1; resize: none; border: 1px solid #ccc; border-radius: 10px; padding: 10px 12px; font-size: 15px; font-family: inherit; }
+    button { background: var(--blue); color: #fff; border: none; padding: 0 18px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    button:disabled { background: #b9f5d8; cursor: default; }
+    #mic { padding: 0 14px; background: #fff; color: var(--blue); border: 1px solid var(--blue); }
+    #mic.listening { background: #FF3B30; color: #fff; border-color: #FF3B30; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
+    .toprow { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 0; }
+    .toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧠 Cortana</h1>
+    <div class="sub">Voice + text assistant · reads your Obsidian vault live · localhost:3000</div>
+  </header>
+  <div class="toprow">
+    <label class="toggle"><input type="checkbox" id="speakToggle" checked /> Speak replies aloud</label>
+    <span class="toggle" id="voiceStatus"></span>
+  </div>
+  <div id="log"></div>
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="What's my day plan?"></textarea>
+    <button id="mic" type="button" title="Hold to talk">🎤</button>
+    <button id="send" type="submit">Send</button>
+  </form>
+  <script>
+    const log = document.getElementById('log');
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const micBtn = document.getElementById('mic');
+    const speakToggle = document.getElementById('speakToggle');
+    const voiceStatus = document.getElementById('voiceStatus');
+
+    function addMsg(text, who) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + who;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+      return div;
+    }
+
+    function speak(text) {
+      if (!speakToggle.checked || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 1.05;
+      window.speechSynthesis.speak(utter);
+    }
+
+    async function sendMessage(message) {
+      if (!message) return;
+      addMsg(message, 'thomas');
+      sendBtn.disabled = true;
+      const placeholder = addMsg('...', 'system');
+
+      try {
+        const resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+        });
+        const text = await resp.text();
+        placeholder.remove();
+        if (!resp.ok) {
+          addMsg('Error: ' + text, 'system');
+        } else {
+          const data = JSON.parse(text);
+          addMsg(data.reply, 'jarvis');
+          speak(data.reply);
+        }
+      } catch (err) {
+        placeholder.remove();
+        addMsg('Network error: ' + err.message, 'system');
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      input.value = '';
+      sendMessage(message);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    // --- Voice input (Web Speech API) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      let wantListening = false; // toggled by mic button clicks
+      let recognitionActive = false; // whether the underlying engine is currently running
+
+      recognition.addEventListener('result', (e) => {
+        const transcript = e.results[e.results.length - 1][0].transcript.trim();
+        if (transcript) sendMessage(transcript);
+      });
+      recognition.addEventListener('end', () => {
+        recognitionActive = false;
+        // Some browsers end the session on silence even with continuous=true; restart if user still wants to listen.
+        if (wantListening) {
+          try {
+            recognition.start();
+            recognitionActive = true;
+          } catch (err) {
+            wantListening = false;
+            micBtn.classList.remove('listening');
+            voiceStatus.textContent = 'Mic stopped: ' + err.message;
+          }
+        } else {
+          micBtn.classList.remove('listening');
+          voiceStatus.textContent = '';
+        }
+      });
+      recognition.addEventListener('error', (e) => {
+        // 'no-speech' fires often during normal pauses; the 'end' handler will restart it, so don't treat as fatal.
+        if (e.error !== 'no-speech') {
+          voiceStatus.textContent = 'Mic error: ' + e.error;
+        }
+      });
+
+      micBtn.addEventListener('click', () => {
+        if (wantListening) {
+          wantListening = false;
+          recognition.stop();
+          return;
+        }
+        window.speechSynthesis.cancel();
+        wantListening = true;
+        micBtn.classList.add('listening');
+        voiceStatus.textContent = 'Listening... (click mic to stop)';
+        recognition.start();
+        recognitionActive = true;
+      });
+    } else {
+      micBtn.disabled = true;
+      micBtn.title = 'Speech recognition not supported in this browser (use Chrome/Edge/Safari)';
+      voiceStatus.textContent = 'Voice input unsupported in this browser';
+    }
+  </script>
+</body>
+</html>
