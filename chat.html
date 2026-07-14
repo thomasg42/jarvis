@@ -68,7 +68,11 @@
       if (!speakToggle.checked || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 1.05;
+      utter.rate = 0.98;
+      utter.pitch = 1.0;
+      const voices = speechSynthesis.getVoices();
+      const preferred = voices.find(v => /Samantha|Serena|Ava|Zira|Google UK English Female|Google US English/i.test(v.name));
+      if (preferred) utter.voice = preferred;
       window.speechSynthesis.speak(utter);
     }
 

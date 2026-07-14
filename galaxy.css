@@ -192,7 +192,8 @@ body.galaxy-view #galaxyHint { display: block; }
 body.galaxy-view #beam,
 body.galaxy-view #projBase,
 body.galaxy-view #holoField { opacity: 0; pointer-events: none; }
-body.galaxy-view #orbStatus { top: 141px; font-size: 9px; }
+body.galaxy-view #cortanaAvatar { opacity: 0; visibility: hidden; }
+body.galaxy-view #orbStatus { top: 141px; bottom: auto; font-size: 9px; }
 body.galaxy-view #hudGrid { opacity: .16; }
 body.galaxy-view { background: radial-gradient(circle at 50% 40%, #161006 0%, #030a06 42%, #020204 100%); }
 

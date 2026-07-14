@@ -200,9 +200,11 @@
     document.body.classList.toggle('galaxy-view', !!useGalaxy);
     document.querySelectorAll('.viewBtn').forEach((b) => b.classList.toggle('active', b.dataset.view === (useGalaxy ? 'galaxy' : 'core')));
     if (galaxy) galaxy.visible = !!useGalaxy;
-    if (orbCore) orbCore.visible = !useGalaxy;
-    if (orbAtmo) orbAtmo.visible = !useGalaxy;
-    if (vaultGraph) vaultGraph.visible = !useGalaxy;
+    // Core view now uses the Cortana image hologram. Keep the legacy orb
+    // and its miniature graph hidden; the full Galaxy remains available.
+    if (orbCore) orbCore.visible = false;
+    if (orbAtmo) orbAtmo.visible = false;
+    if (vaultGraph) vaultGraph.visible = false;
     document.getElementById('sourceCard').classList.remove('open');
     hovered = activeNode = null;
     if (useGalaxy) {
@@ -291,7 +293,7 @@
       await refreshGalaxy(data.path);
       const reply = window.CORTANA_STATIC_MODE
         ? `Saved to this display deck, Chief. The local core will need the field report before it becomes permanent vault memory.`
-        : `Filed in the vault, sir. Another star joins the firmament; the paperwork remains mercifully terrestrial.`;
+        : `Filed in the vault, Chief. Another star joins the mission map; the paperwork remains mercifully terrestrial.`;
       addMsg(reply, 'jarvis', { label: 'Local memory', effort: 'no model', reason: 'vault capture' });
       setState('speaking');
       speak(reply);
@@ -376,12 +378,12 @@
       setView('galaxy', false);
       if (!booted) {
         booted = true;
-        addMsg(`Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, sir. ${data.noteCount} notes indexed, all present and accounted for.`, 'jarvis');
+        addMsg(`Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, Chief. ${data.noteCount} notes indexed. Cortana is online and ready for the mission.`, 'jarvis');
       }
     } catch (err) {
       setView('core', false);
       document.getElementById('galaxyMeta').textContent = 'Galaxy offline · core systems remain available';
-      addMsg('Core systems online. The galaxy is being temperamental; how very celestial of it.', 'jarvis');
+      addMsg('Core systems online, Chief. The galaxy is being temperamental; how very celestial of it.', 'jarvis');
     }
   }
 
