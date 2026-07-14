@@ -48,6 +48,20 @@
     box-shadow: 0 0 26px var(--avatar-glow), 0 0 80px var(--avatar-glow);
     opacity: .82;
   }
+  #cortanaAvatar .cortanaBody {
+    position: relative; z-index: 1; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    transform-style: preserve-3d; perspective: 900px;
+    --look-x: 0px; --look-y: 0px;
+    animation: cortanaPatrol 13.5s ease-in-out infinite;
+    will-change: transform;
+  }
+  #cortanaAvatar .cortanaBody::after {
+    content: ""; position: absolute; z-index: 2; left: 15%; right: 15%; top: 15%; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(190,245,255,.85), transparent);
+    box-shadow: 0 0 10px rgba(110,216,255,.8);
+    opacity: .24; animation: cortanaScan 4.2s linear infinite;
+  }
   #cortanaAvatar img {
     position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain;
     filter: drop-shadow(0 0 8px rgba(110,216,255,.62)) drop-shadow(0 0 24px var(--avatar-glow));
@@ -66,9 +80,16 @@
     --avatar-glow: rgba(75,255,168,.75); --avatar-core: rgba(140,255,200,.34);
   }
   #cortanaAvatar.state-speaking img { animation: cortanaSpeak .72s ease-in-out infinite; }
+  @keyframes cortanaPatrol {
+    0%, 100% { transform: translate3d(calc(var(--look-x) - 28px), var(--look-y), 0) rotateY(7deg); }
+    25% { transform: translate3d(var(--look-x), calc(var(--look-y) - 4px), 10px) rotateY(-1deg); }
+    52% { transform: translate3d(calc(var(--look-x) + 30px), var(--look-y), 0) rotateY(-8deg); }
+    76% { transform: translate3d(calc(var(--look-x) + 2px), calc(var(--look-y) - 3px), 12px) rotateY(2deg); }
+  }
   @keyframes cortanaFloat {
-    0%, 100% { transform: translateY(0) scale(1); opacity: .94; }
-    50% { transform: translateY(-8px) scale(1.006); opacity: 1; }
+    0%, 100% { transform: translateY(0) rotateZ(-.35deg) scale(1); opacity: .94; }
+    35% { transform: translateY(-7px) rotateZ(.5deg) scale(1.007); opacity: 1; }
+    68% { transform: translateY(-3px) rotateZ(-.15deg) scale(1.003); opacity: .98; }
   }
   @keyframes cortanaListen {
     0%, 100% { transform: translateY(-2px) scale(1); filter: drop-shadow(0 0 9px rgba(255,226,122,.58)) drop-shadow(0 0 24px var(--avatar-glow)); }
@@ -79,9 +100,17 @@
     50% { transform: translateY(-9px) scale(1.018); opacity: 1; }
   }
   @keyframes cortanaSpeak {
-    0%, 100% { transform: translateY(-2px) scale(1); filter: drop-shadow(0 0 10px rgba(140,255,200,.72)) drop-shadow(0 0 28px var(--avatar-glow)); }
-    48% { transform: translateY(-7px) scale(1.022); filter: drop-shadow(0 0 16px rgba(180,255,220,.92)) drop-shadow(0 0 46px var(--avatar-glow)); }
+    0%, 100% { transform: translateY(-2px) rotateZ(-.25deg) scale(1); filter: drop-shadow(0 0 10px rgba(140,255,200,.72)) drop-shadow(0 0 28px var(--avatar-glow)); }
+    28% { transform: translateY(-6px) rotateZ(.5deg) scale(1.016); }
+    62% { transform: translateY(-4px) rotateZ(-.4deg) scale(1.022); filter: drop-shadow(0 0 16px rgba(180,255,220,.92)) drop-shadow(0 0 46px var(--avatar-glow)); }
   }
+  #cortanaAvatar.gesture .cortanaBody { animation: cortanaGesture 2.4s ease-in-out; }
+  @keyframes cortanaGesture {
+    0%,100% { transform: translate3d(var(--look-x), var(--look-y), 0) rotateY(0); }
+    35% { transform: translate3d(calc(var(--look-x) + 22px), calc(var(--look-y) - 8px), 18px) rotateY(-10deg) rotateZ(.7deg); }
+    68% { transform: translate3d(calc(var(--look-x) - 8px), calc(var(--look-y) - 3px), 8px) rotateY(5deg); }
+  }
+  @keyframes cortanaScan { from { top: 13%; opacity: 0; } 12% { opacity: .26; } 88% { opacity: .18; } to { top: 91%; opacity: 0; } }
   @keyframes avatarAura { 0%,100% { transform: translate(-50%,-50%) scale(.96); opacity: .56; } 50% { transform: translate(-50%,-50%) scale(1.05); opacity: .82; } }
 
   /* ===== Hologram projector rig ===== */
@@ -450,8 +479,15 @@
 <div id="beam"></div>
 <div id="projBase"></div>
 <div id="cortanaAvatar" class="state-idle" aria-hidden="true">
-  <img src="assets/cortana-hologram.png" alt="" />
+  <div class="cortanaBody"><img src="assets/cortana-hologram.png" alt="" /></div>
 </div>
+<aside id="chiefPanel" aria-label="Master Chief mission statement">
+  <img src="assets/master-chief-panel-v2.png" alt="Master Chief standing guard" />
+  <div class="chiefCopy">
+    <span>MASTER CHIEF // MISSION</span>
+    <strong>PROTECT THE MISSION.<br />PROTECT THE PEOPLE.<br /><em>WE FINISH THE FIGHT.</em></strong>
+  </div>
+</aside>
 <canvas id="orbCanvas"></canvas>
 <div id="hudGrid"></div>
 <div id="scanlines"></div>
@@ -558,12 +594,12 @@
     if (u.startsWith('/api/graph')) return jsonResponse(staticGraph());
     if (u.startsWith('/api/vault/tree')) {
       const graph = staticGraph();
-      return jsonResponse({ root: 'FGA-Brain · deployed snapshot', tree: graphTree(graph.nodes) });
+      return jsonResponse({ root: 'FGA-Brain · public notes', tree: graphTree(graph.nodes.filter((node) => !node.redacted)) });
     }
     if (u.startsWith('/api/vault/file')) {
       const parsed = new URL(u, location.origin);
       const relPath = parsed.searchParams.get('path') || '';
-      const node = staticGraph().nodes.find((item) => item.path === relPath);
+      const node = staticGraph().nodes.find((item) => item.path === relPath && !item.redacted);
       return node
         ? jsonResponse({ path: relPath, content: node.excerpt || '(No excerpt in deployed snapshot.)', truncated: true })
         : jsonResponse({ error: 'Note not found in deployed snapshot' }, 404);
@@ -941,7 +977,7 @@ function pickGraphNode(e) {
 }
 
 function overUI(e) {
-  return !!(e.target.closest && e.target.closest('button, #vault, #sysPanel, #filePreview, #chatWrap, #opsDock, header, .holoCard, #nodeTip'));
+  return !!(e.target.closest && e.target.closest('button, #vault, #sysPanel, #filePreview, #chatWrap, #opsDock, #sourceCard, #viewSwitch, header, .holoCard, #nodeTip'));
 }
 
 window.addEventListener('mousemove', (e) => {
@@ -987,6 +1023,28 @@ function setState(name) {
     orbCore.material.uniforms.glowColor.value.setHex(state.glow);
     orbAtmo.material.uniforms.glowColor.value.setHex(state.glow);
   }
+}
+
+function initCortanaMotion() {
+  const avatar = document.getElementById('cortanaAvatar');
+  const body = avatar && avatar.querySelector('.cortanaBody');
+  if (!avatar || !body) return;
+  window.addEventListener('pointermove', (e) => {
+    if (window.jarvisGalaxyActive) {
+      body.style.setProperty('--look-x', '0px');
+      body.style.setProperty('--look-y', '0px');
+      return;
+    }
+    const x = Math.max(-12, Math.min(12, (e.clientX / window.innerWidth - .5) * 24));
+    const y = Math.max(-6, Math.min(6, (e.clientY / window.innerHeight - .5) * 12));
+    body.style.setProperty('--look-x', `${x.toFixed(1)}px`);
+    body.style.setProperty('--look-y', `${y.toFixed(1)}px`);
+  }, { passive: true });
+  setInterval(() => {
+    if (window.jarvisGalaxyActive || currentState !== 'idle') return;
+    avatar.classList.add('gesture');
+    setTimeout(() => avatar.classList.remove('gesture'), 2400);
+  }, 8200);
 }
 
 function updateCadence() {
@@ -1604,6 +1662,7 @@ setInterval(tick, 10000); tick();
 window.addEventListener('DOMContentLoaded', () => {
   initOrb();
   setState('idle');
+  initCortanaMotion();
   initVaultGraph();
   buildHoloField();
   buildSwitchboard();

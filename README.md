@@ -15,10 +15,17 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
 
 ## What is live
 
-- **GALAXY** (always boots first): 3D map of the markdown vault, grouped by area and linked by
-  wikilinks. Drag to orbit, scroll to travel, click a star to inspect/open its note.
-- **CORE**: a full-body Cortana hologram replaces the old orb. Her projector glow
-  changes for listening, processing, and speaking; Core remains the Galaxy fallback.
+- **GALAXY** (always boots first): a 3D map of every markdown note and connection,
+  split into 12 color-coded vault categories around a centered Halo world. Drag to
+  orbit, scroll to fly, double-click to reset, and select any star.
+- **Public privacy boundary**: every note is present as a star, but the deployed deck
+  exposes titles/text only for `wiki/builds/` and `wiki/learning/`. All other stars
+  use anonymous stable IDs and say “local vault only.”
+- **CORE**: a full-body Cortana hologram replaces the old orb. She patrols, turns,
+  breathes, tracks the pointer, gestures, and reacts differently while listening,
+  processing, and speaking. Her projector remains Core-only.
+- **Master Chief guard panel**: Galaxy includes the generated transparent armor asset
+  and the mission line “Protect the mission. Protect the people. We finish the fight.”
 - **Source flight**: vault-backed answers light their source nodes and fly to the top
   source. Answers using four or more notes highlight the cluster.
 - **Total recall**: say or type `remember that…`; Cortana creates a real note under
@@ -50,15 +57,18 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
 | `GET /api/vault/tree` | Vault drawer tree |
 | `GET /api/models` | Switchboard, effort levels, spend, capabilities |
 
-The generated `graph-data.js` snapshot is safe for public deployment: the generator
-allowlists only `wiki/builds/` and `wiki/learning/`, truncates excerpts, and reindexes
-the filtered links. Client, conversation, personal, identity, and routing notes stay
-local even though the local Galaxy continues to show the complete vault.
+The generated `graph-data.js` snapshot is safe for public deployment: it preserves
+every numeric node and link so the public Galaxy matches the complete vault topology.
+It allowlists real titles, paths, and excerpts only for `wiki/builds/` and
+`wiki/learning/`; every other node receives an anonymous stable path, generic title,
+and local-only message. Client, conversation, personal, identity, and routing content
+never enters the deployed file.
 
 ## Main files
 
 - `index.html` — Cortana hologram, chat, Vault/SYS/Ops, voice, and model/effort UI
 - `assets/cortana-hologram.png` — transparent 941×1672 Core avatar
+- `assets/master-chief-panel-v2.png` — transparent 1024×1536 Galaxy guard panel
 - `galaxy.js` — graph rendering, camera flights, source cards, memory capture
 - `galaxy.css` — galaxy HUD, daytime rail, source panel, responsive layout
 - `server.js` — vault graph, chat router/tools, recall endpoint, TTS, logging

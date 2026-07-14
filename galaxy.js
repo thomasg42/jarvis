@@ -1,12 +1,18 @@
 (() => {
   'use strict';
 
-  const COLORS = [0xffc42e, 0xff6a32, 0x6ed8ff, 0xc18cff, 0x70efaa, 0xff8cc8, 0x8fa8ff, 0xffe6a7, 0x72f1ed];
+  const COLORS = [
+    0xffc42e, 0xff6a32, 0x5edbff, 0xc989ff,
+    0x65f2a5, 0xff78c7, 0x8da2ff, 0xffef9d,
+    0x55efe7, 0xff5252, 0x95e85f, 0xd6a85f,
+    0x7bd0ff, 0xe4e9ff, 0xb6ff57, 0xff9e72,
+  ];
   const STAR_COLOR = new THREE.Color(0xffc42e);
   let graphData = null;
   let galaxy = null;
   let points = null;
   let linkLines = null;
+  let haloWorld = null;
   let nodePositions = [];
   let nodeColors = null;
   let baseColors = [];
@@ -67,9 +73,9 @@
       const btn = e.target.closest('[data-view]');
       if (btn) setView(btn.dataset.view);
     });
-    source.querySelector('[data-action="open"]').addEventListener('click', () => activeNode && openFile(activeNode.path));
+    source.querySelector('[data-action="open"]').addEventListener('click', () => activeNode && !activeNode.redacted && openFile(activeNode.path));
     source.querySelector('[data-action="context"]').addEventListener('click', () => {
-      if (activeNode && !contextFiles.includes(activeNode.path)) { contextFiles.push(activeNode.path); renderChips(); }
+      if (activeNode && !activeNode.redacted && !contextFiles.includes(activeNode.path)) { contextFiles.push(activeNode.path); renderChips(); }
       source.classList.remove('open');
     });
     renderDayRail();
@@ -117,22 +123,78 @@
     return new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffc8a0, size: .045, transparent: true, opacity: .48, depthWrite: false }));
   }
 
+  function buildHaloWorld() {
+    const ring = new THREE.Group();
+    const band = new THREE.Mesh(
+      new THREE.RingGeometry(5.55, 6.18, 256, 1),
+      new THREE.MeshBasicMaterial({
+        color: 0x174d33, transparent: true, opacity: .2,
+        side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending,
+      })
+    );
+    const innerEdge = new THREE.Mesh(
+      new THREE.TorusGeometry(5.55, .035, 8, 256),
+      new THREE.MeshBasicMaterial({ color: 0xffc42e, transparent: true, opacity: .72, depthWrite: false })
+    );
+    const outerEdge = new THREE.Mesh(
+      new THREE.TorusGeometry(6.18, .06, 8, 256),
+      new THREE.MeshBasicMaterial({ color: 0x54ffb0, transparent: true, opacity: .56, depthWrite: false })
+    );
+    const atmosphere = new THREE.Mesh(
+      new THREE.TorusGeometry(5.86, .48, 14, 256),
+      new THREE.MeshBasicMaterial({
+        color: 0x36ff9d, transparent: true, opacity: .035,
+        depthWrite: false, blending: THREE.AdditiveBlending,
+      })
+    );
+    const segments = new THREE.Group();
+    for (let i = 0; i < 96; i++) {
+      if (i % 7 === 0 || i % 11 === 0) continue;
+      const angle = (i / 96) * Math.PI * 2;
+      const radius = 5.86;
+      const marker = new THREE.Mesh(
+        new THREE.BoxGeometry(.16 + rand(i + 80) * .2, .018, .05 + rand(i + 110) * .14),
+        new THREE.MeshBasicMaterial({
+          color: i % 4 ? 0x4bd88f : 0xffc42e,
+          transparent: true, opacity: .16 + rand(i + 50) * .2, depthWrite: false,
+        })
+      );
+      marker.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, .02);
+      marker.rotation.z = angle;
+      segments.add(marker);
+    }
+    ring.add(atmosphere, band, segments, innerEdge, outerEdge);
+    ring.rotation.set(1.08, .08, -.28);
+    ring.position.set(0, -.15, -1.55);
+    return ring;
+  }
+
   function layoutGraph(data) {
     const groupIndex = new Map(data.groups.map((g, i) => [g, i]));
     const groupCounts = new Map();
     const positions = new Array(data.nodes.length);
     data.nodes.forEach((node) => {
-      const gi = groupIndex.get(node.group) || 0;
+      const gi = groupIndex.get(node.group) ?? 0;
       const nth = groupCounts.get(node.group) || 0;
       groupCounts.set(node.group, nth + 1);
-      const ga = (gi / Math.max(1, data.groups.length)) * Math.PI * 2 - Math.PI / 2;
-      const ring = 3.2 + (gi % 3) * .55;
-      const center = new THREE.Vector3(Math.cos(ga) * ring, Math.sin(ga) * ring * .56, (gi % 2 ? 1 : -1) * .65);
+      const totalGroups = Math.max(1, data.groups.length);
+      const gy = totalGroups === 1 ? 0 : 1 - (gi / (totalGroups - 1)) * 2;
+      const radial = Math.sqrt(Math.max(0, 1 - gy * gy));
+      const ga = gi * 2.399963229728653;
+      const center = new THREE.Vector3(
+        Math.cos(ga) * radial * 4.15,
+        gy * 3.15,
+        Math.sin(ga) * radial * 2.6
+      );
       const seed = hash(node.path);
       const a = nth * 2.39996 + rand(seed) * .8;
-      const localR = .26 + Math.sqrt(nth + 1) * .17 + rand(seed + 1) * .28;
-      const z = (rand(seed + 2) - .5) * 2.8;
-      positions[node.id] = center.add(new THREE.Vector3(Math.cos(a) * localR, Math.sin(a) * localR * .72, z));
+      const localR = .22 + Math.sqrt(nth + 1) * .125 + rand(seed + 1) * .24;
+      const localDepth = (rand(seed + 2) - .5) * 1.7;
+      positions[node.id] = center.add(new THREE.Vector3(
+        Math.cos(a) * localR,
+        Math.sin(a) * localR * .72,
+        localDepth
+      ));
     });
     return positions;
   }
@@ -144,7 +206,7 @@
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) obj.material.dispose();
     });
-    galaxy = points = linkLines = null;
+    galaxy = points = linkLines = haloWorld = null;
   }
 
   function buildGalaxy(data) {
@@ -182,14 +244,19 @@
     linkGeo.setAttribute('position', new THREE.Float32BufferAttribute(linkPos, 3));
     linkLines = new THREE.LineSegments(linkGeo, new THREE.LineBasicMaterial({ color: 0x4bdf9a, transparent: true, opacity: .13, blending: THREE.AdditiveBlending, depthWrite: false }));
 
-    galaxy.add(starfield(), linkLines, points);
+    haloWorld = buildHaloWorld();
+    galaxy.add(starfield(), haloWorld, linkLines, points);
     galaxy.rotation.x = -.08;
     scene.add(galaxy);
     raycaster = new THREE.Raycaster();
     raycaster.params.Points.threshold = .13;
 
-    document.getElementById('galaxyMeta').textContent = `${data.noteCount} notes indexed  ·  ${data.links.length} connections  ·  all present and accounted for`;
-    document.getElementById('galaxyLegend').innerHTML = data.groups.slice(0, 9).map((g, i) => `<span class="legendItem"><i style="--c:${cssHex(COLORS[i % COLORS.length])}"></i>${escapeHtml(g)}</span>`).join('');
+    const counts = data.groupCounts || data.nodes.reduce((acc, node) => {
+      acc[node.group] = (acc[node.group] || 0) + 1;
+      return acc;
+    }, {});
+    document.getElementById('galaxyMeta').textContent = `${data.noteCount} notes  ·  ${data.links.length} connections  ·  complete vault map  ·  private text stays local`;
+    document.getElementById('galaxyLegend').innerHTML = data.groups.map((g, i) => `<span class="legendItem"><i style="--c:${cssHex(COLORS[i % COLORS.length])}"></i>${escapeHtml(g)} <b>${counts[g] || 0}</b></span>`).join('');
   }
 
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
@@ -231,10 +298,14 @@
     if (!node) return;
     activeNode = node;
     const card = document.getElementById('sourceCard');
-    card.querySelector('.sourceEyebrow').textContent = cited ? 'Answer source' : `Vault · ${node.group}`;
+    card.classList.toggle('redacted', !!node.redacted);
+    card.querySelector('.sourceEyebrow').textContent = node.redacted
+      ? `Private topology · ${node.group}`
+      : (cited ? 'Answer source' : `Vault · ${node.group}`);
     card.querySelector('.sourceTitle').textContent = node.label;
-    card.querySelector('.sourcePath').textContent = node.path;
+    card.querySelector('.sourcePath').textContent = node.redacted ? 'LOCAL FGA-BRAIN VAULT ONLY' : node.path;
     card.querySelector('.sourceExcerpt').textContent = node.excerpt || 'No excerpt available.';
+    card.querySelectorAll('.sourceActions button').forEach((button) => { button.disabled = !!node.redacted; });
     card.classList.add('open');
     if (cited) { card.classList.remove('sourcePulse'); void card.offsetWidth; card.classList.add('sourcePulse'); }
   }
@@ -348,13 +419,20 @@
     window.addEventListener('dblclick', (e) => {
       if (!window.jarvisGalaxyActive || overUI(e)) return;
       targetCamera.set(0, .3, 10.5); targetLook.set(0, .1, 0);
+      lastInteraction = Date.now();
       document.getElementById('sourceCard').classList.remove('open');
     });
   }
 
   window.jarvisGalaxyTick = () => {
     if (!galaxy || !window.jarvisGalaxyActive) return;
-    if (!dragging && Date.now() - lastInteraction > 3500) galaxy.rotation.y += .00034;
+    const idleFor = Date.now() - lastInteraction;
+    if (!dragging && idleFor > 3500) galaxy.rotation.y += .00034;
+    if (!dragging && idleFor > 9500) {
+      const t = Date.now() * .0001;
+      targetCamera.set(Math.sin(t) * .72, .25 + Math.sin(t * 1.7) * .24, 10.2 + Math.cos(t * .82) * .7);
+      targetLook.set(Math.sin(t * .7) * .2, Math.cos(t * .9) * .12, 0);
+    }
     camera.position.lerp(targetCamera, .045);
     lookTarget.lerp(targetLook, .055);
     camera.lookAt(lookTarget);
