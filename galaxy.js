@@ -289,7 +289,9 @@
       if (!res.ok) throw new Error(raw || 'Capture failed');
       const data = JSON.parse(raw);
       await refreshGalaxy(data.path);
-      const reply = `Filed in the vault, sir. Another star joins the firmament; the paperwork remains mercifully terrestrial.`;
+      const reply = window.CORTANA_STATIC_MODE
+        ? `Saved to this display deck, Chief. The local core will need the field report before it becomes permanent vault memory.`
+        : `Filed in the vault, sir. Another star joins the firmament; the paperwork remains mercifully terrestrial.`;
       addMsg(reply, 'jarvis', { label: 'Local memory', effort: 'no model', reason: 'vault capture' });
       setState('speaking');
       speak(reply);

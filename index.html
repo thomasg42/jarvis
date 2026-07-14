@@ -440,19 +440,102 @@
   </form>
 </div>
 
+<script src="graph-data.js"></script>
 <script>
 /* Static display mode — on GitHub Pages there is no local core (server.js).
-   Intercept /api/* so the UI degrades cleanly instead of surfacing 404s. */
+   Serve a bundled read-only vault snapshot so Galaxy/Vault still work. */
 (function () {
   const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
   if (isLocal) return;
+  window.CORTANA_STATIC_MODE = true;
   const realFetch = window.fetch.bind(window);
+  const CAPTURE_KEY = 'cortana-display-captures-v1';
+  const jsonResponse = (data, status = 200) => Promise.resolve(new Response(JSON.stringify(data), {
+    status, headers: { 'Content-Type': 'application/json' },
+  }));
+  const loadCaptures = () => {
+    try { return JSON.parse(localStorage.getItem(CAPTURE_KEY) || '[]'); } catch (_) { return []; }
+  };
+  const staticGraph = () => {
+    const base = window.CORTANA_STATIC_GRAPH || { nodes: [], links: [], groups: [], noteCount: 0 };
+    const data = JSON.parse(JSON.stringify(base));
+    for (const capture of loadCaptures()) {
+      const node = { ...capture, id: data.nodes.length };
+      data.nodes.push(node);
+      if (!data.groups.includes(node.group)) data.groups.push(node.group);
+    }
+    data.noteCount = data.nodes.length;
+    return data;
+  };
+  const graphTree = (nodes) => {
+    const root = [];
+    for (const node of nodes) {
+      const parts = String(node.path || '').split('/').filter(Boolean);
+      let level = root, current = '';
+      parts.forEach((part, i) => {
+        current = current ? current + '/' + part : part;
+        const isFile = i === parts.length - 1;
+        let item = level.find((entry) => entry.name === part && entry.type === (isFile ? 'file' : 'dir'));
+        if (!item) {
+          item = isFile ? { name: part, type: 'file', path: current } : { name: part, type: 'dir', path: current, children: [] };
+          level.push(item);
+        }
+        if (!isFile) level = item.children;
+      });
+    }
+    return root;
+  };
   window.fetch = function (url, opts) {
     const u = typeof url === 'string' ? url : (url && url.url) || '';
     if (!u.startsWith('/api/')) return realFetch(url, opts);
+    if (u.startsWith('/api/graph')) return jsonResponse(staticGraph());
+    if (u.startsWith('/api/vault/tree')) {
+      const graph = staticGraph();
+      return jsonResponse({ root: 'FGA-Brain · deployed snapshot', tree: graphTree(graph.nodes) });
+    }
+    if (u.startsWith('/api/vault/file')) {
+      const parsed = new URL(u, location.origin);
+      const relPath = parsed.searchParams.get('path') || '';
+      const node = staticGraph().nodes.find((item) => item.path === relPath);
+      return node
+        ? jsonResponse({ path: relPath, content: node.excerpt || '(No excerpt in deployed snapshot.)', truncated: true })
+        : jsonResponse({ error: 'Note not found in deployed snapshot' }, 404);
+    }
+    if (u.startsWith('/api/models')) {
+      return jsonResponse({
+        providers: [
+          ['claude', 'Claude Sonnet', 'claude-sonnet-5', 'Default operating lane'],
+          ['haiku', 'Claude Haiku', 'claude-haiku-4-5', 'Fast trivial lane'],
+          ['fable', 'Claude Fable', 'claude-fable-5', 'High-effort lane'],
+          ['openai', 'GPT', 'gpt-5.6', 'Second opinion / coding'],
+          ['grok', 'Grok', 'grok-4.5', 'Social and real-time pulse'],
+          ['perplexity', 'Perplexity', 'sonar-pro-search', 'Sourced research'],
+        ].map(([id, label, model, strengths]) => ({ id, label, model, strengths, ready: false, tools: false })),
+        efforts: ['low', 'medium', 'high', 'xhigh', 'max'],
+        spend: { today: 0, month: 0, cap: 3, regulation: false, messagesToday: 0 },
+        capabilities: { vault: true, staticDeck: true, webSearch: false, google: false, spotify: false, n8n: false, elevenlabs: false },
+      });
+    }
+    if (u.startsWith('/api/remember')) {
+      let body = {};
+      try { body = JSON.parse((opts && opts.body) || '{}'); } catch (_) {}
+      const cleaned = String(body.text || '').replace(/^remember\s+that[,:]?\s*/i, '').trim();
+      if (!cleaned) return jsonResponse({ error: 'Nothing to remember' }, 400);
+      const captures = loadCaptures();
+      const slug = cleaned.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().split(/\s+/).slice(0, 8).join('-') || 'memory';
+      const capture = {
+        path: 'display-captures/' + Date.now() + '-' + slug + '.md',
+        label: cleaned.split(/\s+/).slice(0, 10).join(' '),
+        group: 'display-captures', excerpt: cleaned,
+      };
+      captures.push(capture);
+      localStorage.setItem(CAPTURE_KEY, JSON.stringify(captures));
+      const graph = staticGraph();
+      return jsonResponse({ success: true, path: capture.path, node: graph.nodes.find((node) => node.path === capture.path), noteCount: graph.noteCount });
+    }
     if (u.startsWith('/api/chat')) {
       const reply = "This is the display deck, Chief — my full core runs on the local rig at localhost:3000, where the vault, models, and memory live. Up here I hold the Ring and look good doing it. Boot the local core and we'll finish the fight.";
-      return Promise.resolve(new Response(JSON.stringify({ reply, sources: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      return jsonResponse({ reply, sources: [], routing: { label: 'Display deck', effort: 'offline', reason: 'local core disconnected' } });
     }
     return Promise.reject(new Error('Cortana core offline — static display mode'));
   };
@@ -461,11 +544,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ============================================================
-   J.A.R.V.I.S ORB — a solid, physically-lit 3D sphere.
+   C.O.R.T.A.N.A CORE — a solid, physically-lit 3D sphere.
    Core: opaque plasma surface with diffuse + specular lighting
    and a fresnel rim. Atmosphere: additive glow shell. The
    surface ripples with speech cadence so the orb visibly talks.
-   Iron Man palette: arc-reactor blue / gold / hot-rod red.
+   Halo palette: Spartan energy green / visor gold.
    ============================================================ */
 let scene, camera, renderer, orbCore = null, orbAtmo = null;
 let vaultGraph = null, filePoints = null, dirPoints = null;
@@ -988,7 +1071,7 @@ function renderSysPanel() {
   }
   html += '<div class="sysH">Live Capabilities</div>';
   const caps = [
-    ['Vault', cap.vault, 'Full read/write on FGA-Brain — notes, wiki, logs. Every write auto-backed-up.'],
+    ['Vault', cap.vault, cap.staticDeck ? 'Read-only deployed FGA-Brain snapshot; local display captures stay in this browser.' : 'Full read/write on FGA-Brain — notes, wiki, logs. Every write auto-backed-up.'],
     ['Google', cap.google, 'Calendar (read + book), Gmail (read; send only on ask), Sheets.'],
     ['Web', cap.webSearch, 'Live web search inside Fable replies; Perplexity for deep sourced research.'],
     ['Spotify', cap.spotify, 'Full playlist control + now playing.'],

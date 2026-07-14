@@ -1,9 +1,23 @@
-# C.O.R.T.A.N.A — Forever Gold AI
+# C.O.R.T.A.N.A — GitHub Pages Display Deck
 
-Halo-themed static deck for the FGA voice assistant (Cortana, UNSC AI CTN 0452-9).
+Live at **https://thomasg42.github.io/jarvis/**.
 
-- **Live:** https://thomasg42.github.io/jarvis/
-- **Full core:** runs locally from `FGA-Brain/jarvis-voice-ui/server.js` (`node server.js`, http://localhost:3000) — vault graph, chat routing, ElevenLabs TTS, memory capture.
-- This Pages deploy is display mode: orb, Halo ring, HUD, and browser-voice chat shell. `/api/*` calls are shimmed offline.
+This static deployment preserves the full Halo green/gold interface and boots directly
+into **GALAXY**. The **CORE / GALAXY** toggle, Vault drawer, SYS panel, Priority Ops,
+daytime rail, voice controls, and model/effort switchboard remain visible and usable.
 
-Source of truth for the UI lives in the FGA-Brain vault at `jarvis-voice-ui/`; copy the four static files here and push to update the live deck.
+Because GitHub Pages cannot run `server.js`, this build ships a sanitized, read-only
+Galaxy snapshot containing only public-safe `wiki/builds/` and `wiki/learning/` notes.
+Display-deck captures stay in that browser. Full models, tools, the complete private
+vault, and permanent memory remain available only from the local core at
+`http://localhost:3000`.
+
+Source of truth: `/Users/tg2.0/Documents/FGA-Brain/jarvis-voice-ui/`.
+
+## Deploy
+
+1. Run `node build-static-graph.js` from the source directory while the local core is up.
+2. Copy `index.html`, `galaxy.css`, `galaxy.js`, `chat.html`, and `graph-data.js` here.
+3. Commit and push `main`.
+
+Pre-Cortana backups remain as `*.bak-preCortana` in the source directory.
