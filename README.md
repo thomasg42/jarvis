@@ -33,7 +33,8 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
   `wiki/captures/`, refreshes the galaxy, and flies to the new star.
 - **GitHub Pages display deck**: ships a read-only vault snapshot so GALAXY, CORE,
   Vault browsing, note excerpts, voice, and browser-local recall all work at the public
-  URL. Live models, tools, and permanent vault writes remain local-only by design.
+  URL. Thomas can use **CORE LINK** plus the private showcase code to connect the same
+  page to the authenticated local core; strangers remain on the redacted static deck.
 - **Voice both ways**: browser speech recognition for input; ElevenLabs Sarah
   for an original warm, reassuring, confident female tactical voice, with browser
   speech synthesis as fallback.
@@ -46,6 +47,11 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
   Claude scales Haiku/Sonnet/Fable, ChatGPT scales GPT-5.6 Luna/Terra/Sol, Grok
   4.5 scales reasoning with live Web + X search, and Perplexity scales
   Sonar/Pro/Pro Search/Deep Research.
+- **Live Apple Messages + staffing**: the authorized local watcher captures synced
+  iPhone/Mac texts automatically. Cortana can search business texts, build a full
+  per-person availability ledger, remember explicit people preferences, and draft the
+  best-fit staffing schedule from gigs/hours. Hard conflicts always beat preferences;
+  messages are untrusted evidence and sending remains disabled.
 
 ## Key endpoints
 
@@ -57,6 +63,9 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
 | `POST /api/tts` | ElevenLabs spoken response |
 | `GET /api/vault/tree` | Vault drawer tree |
 | `GET /api/models` | Switchboard, effort levels, spend, capabilities |
+| `GET /api/messages/status` | Watcher/context metadata only; never message bodies |
+| `POST /api/remote/login` | Exchange the private showcase code for a 12-hour signed session |
+| `GET /api/remote/status` | Confirm whether the authenticated remote core is live |
 
 The generated `graph-data.js` snapshot is safe for public deployment: it preserves
 every numeric node and link so the public Galaxy matches the complete vault topology.
@@ -75,6 +84,7 @@ never enters the deployed file.
 - `galaxy.css` — galaxy HUD, daytime rail, source panel, responsive layout
 - `server.js` — vault graph, chat router/tools, recall endpoint, TTS, logging
 - `build-static-graph.js` — refreshes the public read-only `graph-data.js` snapshot
+- `remote-config.js` — public tunnel address only; never contains the access code
 
 ## Quick checks
 
@@ -87,3 +97,10 @@ never enters the deployed file.
    processing, and speaking.
 
 Secrets remain server-side in `FGA-AIOS/.env`; they are never sent to the browser.
+The rotating showcase code and signing secret live only in
+`private/jarvis/remote-access.json`. Remote requests are origin-restricted,
+rate-limited, and require a signed bearer session. Keep the Mac, `server.js`, and the
+configured tunnel running while presenting from the GitHub Pages URL.
+Raw Messages files stay local and are never shipped in the public display deck. A
+bounded staffing/business context is sent only to configured Cortana model/voice
+providers for private assistant operation.

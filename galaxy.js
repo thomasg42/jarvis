@@ -487,6 +487,7 @@
     }
     if (persist) localStorage.setItem('jarvis-view', useGalaxy ? 'galaxy' : 'core');
   }
+  window.jarvisSetView = setView;
 
   function pickNode(e) {
     if (!window.jarvisGalaxyActive || !points || overUI(e)) return null;
@@ -566,7 +567,7 @@
       const data = JSON.parse(raw);
       await refreshGalaxy(data.path);
       const reply = window.CORTANA_STATIC_MODE
-        ? `Saved to this display deck, Chief. The local core will need the field report before it becomes permanent vault memory.`
+        ? `Saved in this browser-only field log, Chief. Connect the private core to make it permanent vault memory.`
         : `Filed in the vault, Chief. Another star joins the mission map; the paperwork remains mercifully terrestrial.`;
       addMsg(reply, 'jarvis', { label: 'Local memory', effort: 'no model', reason: 'vault capture' });
       setState('speaking');
@@ -586,6 +587,7 @@
     const node = data.nodes.find((n) => n.path === flyPath);
     if (node) setTimeout(() => flyToNode(node, true), 180);
   }
+  window.jarvisRefreshGalaxy = () => refreshGalaxy();
 
   function bindControls() {
     window.addEventListener('mousemove', (e) => {
@@ -658,12 +660,14 @@
       // Always start in GALAXY. CORE remains fully available from the toggle,
       // its preference plumbing stays intact, and it remains the load fallback.
       setView('galaxy', false);
+      window.jarvisGalaxyReady = true;
       if (!booted) {
         booted = true;
         addMsg(`Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, Chief. ${data.noteCount} notes indexed. Cortana is online and ready for the mission.`, 'jarvis');
       }
     } catch (err) {
       setView('core', false);
+      window.jarvisGalaxyReady = true;
       document.getElementById('galaxyMeta').textContent = 'Galaxy offline · core systems remain available';
       addMsg('Core systems online, Chief. The galaxy is being temperamental; how very celestial of it.', 'jarvis');
     }
