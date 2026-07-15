@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="holoFigure" viewBox="0 0 420 720" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+  <defs>
+    <linearGradient id="cBody" gradientUnits="userSpaceOnUse" x1="112" y1="60" x2="306" y2="660">
+      <stop offset="0" stop-color="#ecf5ff"/>
+      <stop offset=".18" stop-color="#b8caff"/>
+      <stop offset=".48" stop-color="#7188e6"/>
+      <stop offset=".76" stop-color="#5367c7"/>
+      <stop offset="1" stop-color="#263b94"/>
+    </linearGradient>
+    <linearGradient id="cBodySide" gradientUnits="userSpaceOnUse" x1="105" y1="0" x2="315" y2="0">
+      <stop offset="0" stop-color="#31499f"/>
+      <stop offset=".23" stop-color="#7188e4"/>
+      <stop offset=".48" stop-color="#d1deff"/>
+      <stop offset=".64" stop-color="#8ba0ee"/>
+      <stop offset="1" stop-color="#2b3e92"/>
+    </linearGradient>
+    <radialGradient id="cFace" cx="42%" cy="30%" r="76%">
+      <stop offset="0" stop-color="#f3f8ff"/>
+      <stop offset=".33" stop-color="#b9caff"/>
+      <stop offset=".72" stop-color="#7286de"/>
+      <stop offset="1" stop-color="#4055ad"/>
+    </radialGradient>
+    <linearGradient id="cFaceShade" x1="0" y1="0" x2="1" y2=".6">
+      <stop offset="0" stop-color="#eff7ff" stop-opacity=".72"/>
+      <stop offset=".48" stop-color="#a7b8f3" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#243879" stop-opacity=".54"/>
+    </linearGradient>
+    <linearGradient id="cHair" gradientUnits="userSpaceOnUse" x1="176" y1="35" x2="251" y2="196">
+      <stop offset="0" stop-color="#31469b"/>
+      <stop offset=".36" stop-color="#1b2c72"/>
+      <stop offset=".74" stop-color="#111f59"/>
+      <stop offset="1" stop-color="#07123b"/>
+    </linearGradient>
+    <linearGradient id="cViolet" gradientUnits="userSpaceOnUse" x1="130" y1="170" x2="286" y2="620">
+      <stop offset="0" stop-color="#4b45b7" stop-opacity=".52"/>
+      <stop offset=".5" stop-color="#262d86" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#172365" stop-opacity=".82"/>
+    </linearGradient>
+    <pattern id="cMicro" width="10" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 7.2H10" stroke="#e9f9ff" stroke-width=".58" opacity=".3"/>
+      <path d="M2.5 0V8M7.5 0V8" stroke="#6eeaff" stroke-width=".28" opacity=".14"/>
+    </pattern>
+    <filter id="cInnerGlow" x="-25%" y="-20%" width="150%" height="145%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g class="figureRoot">
+    <path d="M210 38C177 38 162 66 163 104L166 182C153 190 139 203 134 221L119 386C117 401 119 419 128 433L158 390C159 437 164 476 172 506C176 531 172 574 173 605C174 643 170 672 160 690C170 703 190 702 210 698C230 702 250 703 260 690C250 672 246 643 247 605C248 574 244 531 248 506C256 476 261 437 262 390L292 433C301 419 303 401 301 386L286 221C281 203 267 190 254 182L257 104C258 66 243 38 210 38Z" fill="#6684ff" opacity=".1" filter="url(#cInnerGlow)"/>
+
+    <g class="pelvisGroup">
+      <g class="legs">
+        <path fill="url(#cBodySide)" d="M170 380C159 414 160 455 171 494C179 520 178 542 175 571C171 607 175 637 182 663L203 663C205 635 208 608 208 579C208 544 211 519 212 486L207 399C196 389 182 383 170 380Z"/>
+        <path fill="url(#cBodySide)" d="M250 380C261 414 260 455 249 494C241 520 242 542 245 571C249 607 245 637 238 663L217 663C215 635 212 608 212 579C212 544 209 519 208 486L213 399C224 389 238 383 250 380Z"/>
+        <path fill="url(#cMicro)" opacity=".3" d="M170 380C159 414 160 455 171 494C179 520 178 542 175 571C171 607 175 637 182 663L203 663C205 635 208 608 208 579C208 544 211 519 212 486L207 399C196 389 182 383 170 380Z"/>
+        <path fill="url(#cMicro)" opacity=".3" d="M250 380C261 414 260 455 249 494C241 520 242 542 245 571C249 607 245 637 238 663L217 663C215 635 212 608 212 579C212 544 209 519 208 486L213 399C224 389 238 383 250 380Z"/>
+        <path fill="url(#cViolet)" d="M169 398C163 432 166 466 176 497L202 492L204 405C193 397 181 394 169 398ZM251 398C257 432 254 466 244 497L218 492L216 405C227 397 239 394 251 398Z" opacity=".26"/>
+        <path fill="url(#cViolet)" d="M175 516C178 548 172 582 176 610L202 610L207 503L175 516ZM245 516C242 548 248 582 244 610L218 610L213 503L245 516Z" opacity=".35"/>
+        <path class="cAnatomy" d="M171 494Q188 507 206 494M176 566Q190 574 205 566M249 494Q232 507 214 494M244 566Q230 574 215 566M188 414Q198 450 203 484M232 414Q222 450 217 484"/>
+        <path class="cPanel" d="M164 444Q185 458 204 447M176 526Q191 535 205 526M256 444Q235 458 216 447M244 526Q229 535 215 526"/>
+        <path class="cCircuit hot circuitFlow" d="M181 687L185 643L183 602L189 566L184 520L190 478L185 433L190 390M239 687L235 643L237 602L231 566L236 520L230 478L235 433L230 390"/>
+        <path class="cCircuit" d="M199 657L197 615L202 579L199 541M221 657L223 615L218 579L221 541M173 470L190 478L204 468M247 470L230 478L216 468"/>
+        <circle class="cNode" cx="183" cy="602" r="2"/><circle class="cNode" cx="184" cy="520" r="2"/><circle class="cNode" cx="237" cy="602" r="2"/><circle class="cNode" cx="236" cy="520" r="2"/>
+
+        <path fill="url(#cBodySide)" d="M181 655C180 669 170 681 162 689C161 697 177 701 198 700L212 696L202 660Z"/>
+        <path fill="url(#cBodySide)" d="M239 655C240 669 250 681 258 689C259 697 243 701 222 700L208 696L218 660Z"/>
+        <path class="cContour" d="M162 689Q181 694 205 690M258 689Q239 694 215 690"/>
+        <path class="toe" d="M166 685L164 694M175 688L174 698M185 689L185 699M195 689L196 699M254 685L256 694M245 688L246 698M235 689L235 699M225 689L224 699"/>
+      </g>
+
+      <path fill="url(#cBodySide)" d="M170 344C159 359 157 378 164 400C176 417 244 417 256 400C263 378 261 359 250 344C231 334 189 334 170 344Z"/>
+      <path fill="url(#cViolet)" opacity=".24" d="M165 366Q210 386 255 366L257 399Q210 419 163 399Z"/>
+      <path class="cPanel" d="M166 367Q210 385 254 367M165 397Q210 410 255 397M210 343V410"/>
+      <path class="cCircuit hot circuitFlow" d="M190 402L191 373L202 357L202 340M230 402L229 373L218 357L218 340"/>
+      <circle class="cNode" cx="191" cy="373" r="2.2"/><circle class="cNode" cx="229" cy="373" r="2.2"/>
+    </g>
+
+    <g class="torsoGroup">
+      <path fill="url(#cBodySide)" d="M177 194C164 196 154 204 150 218C146 236 158 258 168 277C177 295 179 311 174 329C169 346 168 360 174 371C188 381 232 381 246 371C252 360 251 346 246 329C241 311 243 295 252 277C262 258 274 236 270 218C266 204 256 196 243 194C232 189 221 186 210 186C199 186 188 189 177 194Z"/>
+      <path fill="url(#cMicro)" opacity=".3" d="M177 194C164 196 154 204 150 218C146 236 158 258 168 277C177 295 179 311 174 329C169 346 168 360 174 371C188 381 232 381 246 371C252 360 251 346 246 329C241 311 243 295 252 277C262 258 274 236 270 218C266 204 256 196 243 194C232 189 221 186 210 186C199 186 188 189 177 194Z"/>
+      <path fill="url(#cFaceShade)" opacity=".42" d="M178 196C190 190 201 188 210 188V375C192 374 180 363 178 347C176 327 184 308 181 288C177 258 163 224 178 196Z"/>
+      <path fill="url(#cViolet)" opacity=".25" d="M152 231Q177 211 204 222L198 285L169 300C157 278 148 253 152 231ZM268 231Q243 211 216 222L222 285L251 300C263 278 272 253 268 231Z"/>
+      <path fill="url(#cViolet)" opacity=".16" d="M174 316Q210 329 246 316L252 356Q210 371 168 356Z"/>
+      <path class="cContour" d="M170 202Q190 191 210 193Q230 191 250 202M181 216Q210 207 239 216M175 305Q210 319 245 305"/>
+      <path class="cAnatomy" d="M183 218Q194 228 205 223M237 218Q226 228 215 223M210 195V355M179 287Q190 298 199 294M241 287Q230 298 221 294"/>
+      <path class="cPanel" d="M157 248Q210 268 263 248M168 326Q210 339 252 326M168 359Q210 374 252 359"/>
+      <path class="cCircuit hot circuitFlow" d="M190 356L189 325L199 307L198 277L188 249L194 213L201 188M230 356L231 325L221 307L222 277L232 249L226 213L219 188"/>
+      <path class="cCircuit" d="M164 272L184 274L198 262M256 272L236 274L222 262M176 342L199 342L210 354L221 342L244 342"/>
+      <circle class="cNode" cx="199" cy="307" r="2.2"/><circle class="cNode" cx="221" cy="307" r="2.2"/><circle class="cNode" cx="188" cy="249" r="2"/><circle class="cNode" cx="232" cy="249" r="2"/>
+    </g>
+
+    <g class="arm armR">
+      <path fill="url(#cBodySide)" d="M156 199C144 201 137 217 135 239C133 261 134 287 135 309C140 314 147 312 150 304C153 282 156 257 159 234C161 217 161 204 156 199Z"/>
+      <path fill="url(#cMicro)" opacity=".28" d="M156 199C144 201 137 217 135 239C133 261 134 287 135 309C140 314 147 312 150 304C153 282 156 257 159 234C161 217 161 204 156 199Z"/>
+      <path class="cAnatomy" d="M139 220Q148 225 158 219M135 274Q143 278 152 274"/>
+      <path class="cCircuit circuitFlow" d="M149 205L142 239L141 275L135 307"/>
+      <g class="forearm forearmR">
+        <path fill="url(#cBodySide)" d="M134 303C130 326 126 352 125 377C124 387 126 395 131 398C136 397 139 393 140 385C141 360 142 336 143 314C141 307 138 304 134 303Z"/>
+        <path fill="url(#cMicro)" opacity=".27" d="M134 303C130 326 126 352 125 377C124 387 126 395 131 398C136 397 139 393 140 385C141 360 142 336 143 314C141 307 138 304 134 303Z"/>
+        <path class="cContour" d="M123 341Q131 345 140 341"/>
+        <path class="cCircuit circuitFlow" d="M136 310L130 346L128 394"/>
+        <g class="handR">
+          <g class="handGeometry" transform="translate(26 79) scale(.8)">
+          <path fill="url(#cBodySide)" d="M122 391C115 398 111 409 112 421L113 438C114 444 119 444 121 438L121 421L123 447C124 453 129 452 130 446L129 421L133 443C134 449 139 447 139 441L136 417L141 435C143 441 147 438 145 432L139 404C137 395 130 390 122 391Z"/>
+          <path class="finger" d="M120 408L120 438M125 407L126 447M130 407L136 442M135 405L143 433"/>
+          <circle class="cNode" cx="128" cy="395" r="2"/>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <g class="arm armL">
+      <path fill="url(#cBodySide)" d="M264 199C276 201 283 217 285 239C287 261 286 287 285 309C280 314 273 312 270 304C267 282 264 257 261 234C259 217 259 204 264 199Z"/>
+      <path fill="url(#cMicro)" opacity=".28" d="M264 199C276 201 283 217 285 239C287 261 286 287 285 309C280 314 273 312 270 304C267 282 264 257 261 234C259 217 259 204 264 199Z"/>
+      <path class="cAnatomy" d="M281 220Q272 225 262 219M285 274Q277 278 268 274"/>
+      <path class="cCircuit circuitFlow" d="M271 205L278 239L279 275L285 307"/>
+      <g class="forearm forearmL">
+        <path fill="url(#cBodySide)" d="M286 303C290 326 294 352 295 377C296 387 294 395 289 398C284 397 281 393 280 385C279 360 278 336 277 314C279 307 282 304 286 303Z"/>
+        <path fill="url(#cMicro)" opacity=".27" d="M286 303C290 326 294 352 295 377C296 387 294 395 289 398C284 397 281 393 280 385C279 360 278 336 277 314C279 307 282 304 286 303Z"/>
+        <path class="cContour" d="M297 341Q289 345 280 341"/>
+        <path class="cCircuit circuitFlow" d="M284 310L290 346L292 394"/>
+        <g class="handL">
+          <g class="handGeometry" transform="translate(58 79) scale(.8)">
+          <path fill="url(#cBodySide)" d="M298 391C305 398 309 409 308 421L307 438C306 444 301 444 299 438L299 421L297 447C296 453 291 452 290 446L291 421L287 443C286 449 281 447 281 441L284 417L279 435C277 441 273 438 275 432L281 404C283 395 290 390 298 391Z"/>
+          <path class="finger" d="M300 408L300 438M295 407L294 447M290 407L284 442M285 405L277 433"/>
+          <circle class="cNode" cx="292" cy="395" r="2"/>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <g class="thinkingArm">
+      <path fill="url(#cBodySide)" d="M158 199C145 197 128 204 116 217C110 224 114 234 123 237C137 230 149 220 161 211Z"/>
+      <path fill="url(#cMicro)" opacity=".27" d="M158 199C145 197 128 204 116 217C110 224 114 234 123 237C137 230 149 220 161 211Z"/>
+      <path fill="url(#cBodySide)" d="M116 219C140 210 169 195 198 176C203 172 210 178 206 184C179 203 151 223 128 237C121 242 112 234 116 219Z"/>
+      <path class="cCircuit circuitFlow" d="M153 205L124 225L158 207L203 180"/>
+      <path fill="url(#cBodySide)" d="M197 178C203 173 208 168 211 162C213 158 217 160 216 164L213 171L218 165C221 162 224 165 221 168L215 174L220 171C224 169 226 173 222 175L212 181C208 186 201 185 197 178Z"/>
+      <path class="finger" d="M203 177L214 168M206 180L219 173M201 174L211 165"/>
+      <circle class="cNode" cx="203" cy="180" r="2"/>
+    </g>
+
+    <g class="headGroup">
+      <g class="headScale" transform="translate(44 41) scale(.79)">
+      <path fill="url(#cBodySide)" d="M194 157L226 157L229 194C219 202 201 202 191 194Z"/>
+      <path fill="url(#cHair)" d="M166 103C160 74 171 48 193 37C217 25 245 37 255 62C265 87 260 130 253 157C249 174 241 188 233 198C235 174 239 151 236 127L184 127C181 151 185 174 187 198C179 188 171 174 167 157C160 135 161 117 166 103Z"/>
+      <path fill="url(#cBodySide)" d="M180 100C172 97 168 106 171 119C173 128 178 132 183 126L184 104ZM240 100C248 97 252 106 249 119C247 128 242 132 237 126L236 104Z"/>
+      <path fill="url(#cFace)" d="M180 91C181 62 192 47 210 45C230 46 242 63 242 91C242 119 235 145 222 159C216 166 209 170 203 167C188 161 178 130 178 103C178 99 179 95 180 91Z"/>
+      <path fill="url(#cFaceShade)" opacity=".5" d="M182 87C185 62 195 49 210 48C208 83 208 128 211 164C196 161 184 136 182 104Z"/>
+      <path fill="url(#cHair)" d="M168 96C166 68 178 43 202 36C225 29 247 44 253 68C255 82 250 96 242 107C240 86 231 68 217 59C207 72 191 76 181 94C176 105 168 107 168 96Z"/>
+      <path fill="url(#cHair)" d="M183 94C186 70 199 50 219 41C216 56 208 71 198 82C192 89 187 93 183 94Z" opacity=".94"/>
+      <path fill="#1a2a6d" opacity=".92" d="M169 93C164 117 166 148 178 174L188 194C183 165 185 139 184 111C177 107 173 101 169 93ZM249 88C257 110 255 146 242 176L232 195C238 164 235 139 237 108C244 104 248 97 249 88Z"/>
+      <path fill="#263b8b" opacity=".34" d="M177 76C186 53 201 41 219 41C203 51 195 67 190 88C184 96 179 97 174 96Z"/>
+
+      <path class="brow" d="M186 105Q194 101 203 103M217 103Q226 101 234 105"/>
+      <g class="eyePair">
+        <path d="M186 116Q194 110 202 115Q194 121 186 116Z" fill="#f2fbff"/>
+        <path d="M218 115Q226 110 234 116Q226 121 218 115Z" fill="#f2fbff"/>
+        <g class="pupilPair">
+          <ellipse cx="194" cy="115.5" rx="3.2" ry="3.6" fill="#314a9b"/><circle cx="194" cy="115.5" r="1.65" fill="#0a1742"/><circle cx="195.1" cy="114.4" r=".8" fill="#d9fcff"/>
+          <ellipse cx="226" cy="115.5" rx="3.2" ry="3.6" fill="#314a9b"/><circle cx="226" cy="115.5" r="1.65" fill="#0a1742"/><circle cx="224.9" cy="114.4" r=".8" fill="#d9fcff"/>
+        </g>
+        <path class="lash" d="M186 116Q194 110 202 115M218 115Q226 110 234 116"/>
+      </g>
+      <path class="faceLine" d="M210 116C209 124 206 132 207 136Q210 139 214 136M188 128Q192 145 201 155M233 128Q229 145 220 156"/>
+      <path class="cAnatomy" d="M184 123Q194 127 204 122M216 122Q226 127 236 123M202 143Q210 146 218 143"/>
+
+      <g class="jaw">
+        <path class="viseme viseme-rest" d="M201 150Q210 153 219 150Q210 156 201 150Z" fill="#273778" opacity=".9"/>
+        <path class="viseme viseme-m" d="M201 150Q210 148 219 150Q210 152 201 150Z" fill="#253477"/>
+        <g class="viseme viseme-a">
+          <path d="M201 150Q210 146 219 150Q218 158 210 161Q202 158 201 150Z" fill="#091535"/>
+          <path d="M203 150Q210 148 217 150L216 153Q210 151 204 153Z" fill="#eaf6ff"/>
+          <path d="M205 158Q210 156 215 158Q210 161 205 158Z" fill="#72528c"/>
+        </g>
+        <g class="viseme viseme-e">
+          <path d="M200 150Q210 147 220 150Q210 156 200 150Z" fill="#0a1638"/>
+          <path d="M202 150Q210 148 218 150L216 152H204Z" fill="#edf8ff"/>
+        </g>
+        <g class="viseme viseme-o">
+          <ellipse cx="210" cy="153" rx="5" ry="6.4" fill="#081334"/>
+          <ellipse cx="210" cy="153" rx="6.1" ry="7.5" fill="none" stroke="#334a9b" stroke-width="1.35"/>
+        </g>
+        <g class="viseme viseme-f">
+          <path d="M201 149Q210 147 219 149L217 152Q210 150 203 152Z" fill="#edf8ff"/>
+          <path d="M201 153Q210 157 219 153Q210 160 201 153Z" fill="#33498e"/>
+        </g>
+        <path class="faceLine" d="M203 164Q210 168 218 163" opacity=".42"/>
+      </g>
+
+      <path class="cCircuit hot circuitFlow" d="M198 194L198 170L189 160L189 142L179 134M222 194L222 170L231 160L231 142L241 134"/>
+      <path class="cCircuit" d="M178 91L192 91L201 80M242 91L228 91L219 80"/>
+      <circle class="cNode" cx="189" cy="142" r="1.8"/><circle class="cNode" cx="231" cy="142" r="1.8"/>
+      <path class="hairLine" d="M171 94Q177 58 201 40M178 109Q184 71 211 40M239 110Q242 74 220 42M249 92Q247 62 229 47M174 120Q168 151 183 187M246 118Q252 150 237 188M185 99Q196 78 215 61"/>
+      </g>
+    </g>
+  </g>
+</svg>
