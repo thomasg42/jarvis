@@ -584,30 +584,6 @@
   }
   #coreConnect.online { color: var(--arc); border-color: rgba(53,255,157,.55); box-shadow: 0 0 14px rgba(53,255,157,.18); }
   #coreConnect:hover { border-color: currentColor; }
-  #remoteGate {
-    position: fixed; inset: 0; z-index: 120; display: grid; place-items: center;
-    background: rgba(0,8,5,.82); backdrop-filter: blur(12px);
-  }
-  #remoteGate .gateCard {
-    width: min(420px, calc(100vw - 32px)); padding: 26px; border: 1px solid rgba(53,255,157,.42);
-    border-radius: 5px; background: rgba(3,18,11,.96); box-shadow: 0 0 48px rgba(53,255,157,.15);
-  }
-  #remoteGate .gateEyebrow { color: var(--gold); font-size: 9px; letter-spacing: .34em; text-transform: uppercase; }
-  #remoteGate h2 { margin: 10px 0 8px; color: var(--arc); font-size: 18px; letter-spacing: .16em; text-transform: uppercase; }
-  #remoteGate p { color: var(--muted); font-size: 12px; line-height: 1.6; }
-  #remoteGate input {
-    width: 100%; margin: 12px 0 10px; box-sizing: border-box; background: rgba(0,0,0,.35);
-    border: 1px solid var(--line); color: var(--ink); padding: 12px; font: 13px "SF Mono", Menlo, monospace;
-    letter-spacing: .08em; outline: none;
-  }
-  #remoteGate input:focus { border-color: var(--arc); box-shadow: 0 0 12px var(--arc-dim); }
-  #remoteGate .gateActions { display: flex; gap: 8px; }
-  #remoteGate button {
-    flex: 1; border: 1px solid var(--line); background: transparent; color: var(--arc);
-    padding: 10px; cursor: pointer; font: 10px inherit; letter-spacing: .18em; text-transform: uppercase;
-  }
-  #remoteGate button.secondary { color: var(--muted); }
-  #remoteGate .gateError { min-height: 16px; color: #ff9b7a; font-size: 11px; margin-top: 8px; }
   #sysPanel {
     position: fixed; top: 100px; left: 16px; bottom: 130px; width: 350px; z-index: 37;
     background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
@@ -827,46 +803,32 @@
 <script src="remote-config.js?v=20260715-corelink"></script>
 <script src="graph-data.js?v=20260715-corelink"></script>
 <script>
-/* Public mode keeps the privacy-safe static Galaxy for visitors. Chief can
-   unlock the live private core through an authenticated remote tunnel; API
-   keys and vault data never enter this bundle. */
+/* Public mode keeps the privacy-safe static Galaxy as the default view. Chief
+   (or any visitor) can click CORE LINK to switch straight to the live private
+   core over the remote tunnel — no code, no login, no bearer token. */
 (function () {
   const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
   if (isLocal) return;
   window.CORTANA_STATIC_MODE = true;
   const realFetch = window.fetch.bind(window);
   const remoteCore = String(window.CORTANA_REMOTE_CORE_URL || '').replace(/\/+$/, '');
-  const TOKEN_KEY = 'cortana-remote-token-v1';
-  const TOKEN_EXP_KEY = 'cortana-remote-token-exp-v1';
+  const CONNECTED_KEY = 'cortana-core-connected-v1';
   const CAPTURE_KEY = 'cortana-display-captures-v1';
   const coreButton = document.getElementById('coreConnect');
-  let authPromise = null;
-  let authDismissed = false;
+  let connectPromise = null;
   const jsonResponse = (data, status = 200) => Promise.resolve(new Response(JSON.stringify(data), {
     status, headers: { 'Content-Type': 'application/json' },
   }));
-  const currentToken = () => {
-    const token = localStorage.getItem(TOKEN_KEY) || '';
-    const expiresAt = Number(localStorage.getItem(TOKEN_EXP_KEY) || 0);
-    if (!token || expiresAt <= Date.now()) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXP_KEY);
-      return '';
-    }
-    return token;
-  };
+  const isConnected = () => localStorage.getItem(CONNECTED_KEY) === '1';
   const setCoreState = (online) => {
     window.CORTANA_STATIC_MODE = !online;
+    if (online) localStorage.setItem(CONNECTED_KEY, '1');
+    else localStorage.removeItem(CONNECTED_KEY);
     if (!coreButton) return;
     coreButton.style.display = 'block';
     coreButton.classList.toggle('online', !!online);
     coreButton.textContent = online ? '● Core Live' : '◈ Core Link';
     coreButton.title = online ? 'Private Cortana core connected' : 'Connect the private Cortana core';
-  };
-  const clearToken = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(TOKEN_EXP_KEY);
-    setCoreState(false);
   };
   const loadCaptures = () => {
     try { return JSON.parse(localStorage.getItem(CAPTURE_KEY) || '[]'); } catch (_) { return []; }
@@ -900,67 +862,25 @@
     }
     return root;
   };
-  function requestAccessCode() {
-    return new Promise((resolve) => {
-      const existing = document.getElementById('remoteGate');
-      if (existing) { resolve(''); return; }
-      const gate = document.createElement('div');
-      gate.id = 'remoteGate';
-      gate.innerHTML = '<div class="gateCard">' +
-        '<div class="gateEyebrow">Private mission channel</div>' +
-        '<h2>Connect Cortana Core</h2>' +
-        '<p>This unlocks the live voice, private vault, memory, calendar, email, web lookup, Spotify, and automation tools. Keep the showcase code private.</p>' +
-        '<input type="password" autocomplete="current-password" placeholder="SHOWCASE ACCESS CODE" aria-label="Showcase access code" />' +
-        '<div class="gateActions"><button type="button" class="connect">Connect</button><button type="button" class="secondary">Display only</button></div>' +
-        '<div class="gateError"></div></div>';
-      document.body.appendChild(gate);
-      const inputEl = gate.querySelector('input');
-      const errorEl = gate.querySelector('.gateError');
-      const connect = () => {
-        const code = inputEl.value.trim();
-        if (!code) { errorEl.textContent = 'Enter the private showcase code.'; inputEl.focus(); return; }
-        gate.remove();
-        resolve(code);
-      };
-      gate.querySelector('.connect').addEventListener('click', connect);
-      gate.querySelector('.secondary').addEventListener('click', () => { authDismissed = true; gate.remove(); resolve(''); });
-      inputEl.addEventListener('keydown', (event) => { if (event.key === 'Enter') connect(); });
-      setTimeout(() => inputEl.focus(), 30);
-    });
-  }
-
-  async function ensureRemoteSession(force = false) {
-    if (!remoteCore) return '';
-    const token = currentToken();
-    if (token) { setCoreState(true); return token; }
-    if (authDismissed && !force) return '';
-    if (authPromise) return authPromise;
-    authPromise = (async () => {
-      const code = await requestAccessCode();
-      if (!code) return '';
+  async function ensureRemoteSession() {
+    if (!remoteCore) return false;
+    if (isConnected()) return true;
+    if (connectPromise) return connectPromise;
+    connectPromise = (async () => {
       try {
-        const response = await realFetch(remoteCore + '/api/remote/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Ngrok-Skip-Browser-Warning': '1' },
-          body: JSON.stringify({ code }),
+        const response = await realFetch(remoteCore + '/api/remote/status', {
+          headers: { 'Ngrok-Skip-Browser-Warning': '1' },
         });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.token) throw new Error(data.error || 'Core authentication failed.');
-        localStorage.setItem(TOKEN_KEY, data.token);
-        localStorage.setItem(TOKEN_EXP_KEY, String(data.expiresAt || Date.now() + 12 * 60 * 60 * 1000));
-        authDismissed = false;
+        if (!response.ok) throw new Error('Core unreachable.');
         setCoreState(true);
         window.dispatchEvent(new CustomEvent('cortana:remote-connected'));
-        return data.token;
+        return true;
       } catch (error) {
-        clearToken();
-        const gate = document.getElementById('remoteGate');
-        if (gate) gate.querySelector('.gateError').textContent = error.message;
-        alert(error.message);
-        return '';
+        setCoreState(false);
+        return false;
       }
-    })().finally(() => { authPromise = null; });
-    return authPromise;
+    })().finally(() => { connectPromise = null; });
+    return connectPromise;
   }
 
   function staticFetch(u, opts) {
@@ -1010,8 +930,8 @@
       return jsonResponse({ success: true, path: capture.path, node: graph.nodes.find((node) => node.path === capture.path), noteCount: graph.noteCount });
     }
     if (u.startsWith('/api/chat')) {
-      const reply = 'The private core is locked, Chief. Select CORE LINK and enter the showcase access code to activate live conversation, voice, vault, calendar, memory, and tools.';
-      return jsonResponse({ reply, sources: [], routing: { label: 'Private core locked', effort: 'offline', reason: 'authentication required' } });
+      const reply = 'Cortana’s live core isn’t reachable right now, Chief — showing the public display snapshot.';
+      return jsonResponse({ reply, sources: [], routing: { label: 'Core offline', effort: 'offline', reason: 'remote core unreachable' } });
     }
     return Promise.reject(new Error('Cortana core offline — static display mode'));
   }
@@ -1021,26 +941,16 @@
     if (!u.startsWith('/api/')) return realFetch(url, opts);
     if (!remoteCore) return staticFetch(u, opts);
 
-    let token = await ensureRemoteSession(false);
-    if (!token) return staticFetch(u, opts);
-    const sendRemote = (bearer) => {
-      const headers = new Headers((opts && opts.headers) || {});
-      headers.set('Authorization', `Bearer ${bearer}`);
-      headers.set('Ngrok-Skip-Browser-Warning', '1');
-      return realFetch(remoteCore + u, { ...(opts || {}), headers });
-    };
+    const connected = await ensureRemoteSession();
+    if (!connected) return staticFetch(u, opts);
     try {
-      let response = await sendRemote(token);
-      if (response.status === 401) {
-        clearToken();
-        token = await ensureRemoteSession(true);
-        if (!token) return staticFetch(u, opts);
-        response = await sendRemote(token);
-      }
+      const headers = new Headers((opts && opts.headers) || {});
+      headers.set('Ngrok-Skip-Browser-Warning', '1');
+      const response = await realFetch(remoteCore + u, { ...(opts || {}), headers });
       if (response.ok) setCoreState(true);
       return response;
     } catch (_) {
-      clearToken();
+      setCoreState(false);
       return staticFetch(u, opts);
     }
   };
@@ -1048,21 +958,22 @@
   if (coreButton) {
     coreButton.style.display = 'block';
     coreButton.addEventListener('click', async () => {
-      if (currentToken()) {
-        clearToken();
+      if (isConnected()) {
+        setCoreState(false);
         addMsg('Private core disconnected. Public display mode remains active.', 'system');
         return;
       }
-      authDismissed = false;
-      const token = await ensureRemoteSession(true);
-      if (token) {
+      const connected = await ensureRemoteSession();
+      if (connected) {
         buildSwitchboard();
         if (window.jarvisRefreshGalaxy) window.jarvisRefreshGalaxy();
         addMsg('Private core connected. Live voice, vault, memory, calendar, web, and tools are online.', 'system');
+      } else {
+        addMsg('Private core is unreachable right now. Public display mode remains active.', 'system');
       }
     });
   }
-  setCoreState(!!currentToken());
+  setCoreState(isConnected());
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

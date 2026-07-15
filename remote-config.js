@@ -1,3 +1,4 @@
 // Public runtime endpoint only. This file must never contain credentials.
-// The authenticated tunnel URL is inserted during the authorized deploy.
-window.CORTANA_REMOTE_CORE_URL = 'https://checked-sides-vector-arrangement.trycloudflare.com';
+// The tunnel URL is inserted during the authorized deploy. CORE LINK behind
+// this URL is an open bridge (no access code/login) as of 2026-07-15.
+window.CORTANA_REMOTE_CORE_URL = 'https://ripe-christ-amplifier-andrews.trycloudflare.com';

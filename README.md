@@ -34,8 +34,8 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
   `wiki/captures/`, refreshes the galaxy, and flies to the new star.
 - **GitHub Pages display deck**: ships a read-only vault snapshot so GALAXY, CORE,
   Vault browsing, note excerpts, voice, and browser-local recall all work at the public
-  URL. Thomas can use **CORE LINK** plus the private showcase code to connect the same
-  page to the authenticated local core; strangers remain on the redacted static deck.
+  URL. Anyone can use **CORE LINK** to connect the same page to the live local core —
+  no code, no login; it is a fully open bridge, not a gate.
 - **Voice both ways**: browser speech recognition for input; ElevenLabs Sarah
   for an original warm, reassuring, confident female tactical voice, with browser
   speech synthesis as fallback.
@@ -65,8 +65,7 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
 | `GET /api/vault/tree` | Vault drawer tree |
 | `GET /api/models` | Switchboard, effort levels, spend, capabilities |
 | `GET /api/messages/status` | Watcher/context metadata only; never message bodies |
-| `POST /api/remote/login` | Exchange the private showcase code for a 12-hour signed session |
-| `GET /api/remote/status` | Confirm whether the authenticated remote core is live |
+| `GET /api/remote/status` | Confirm whether the remote core is live (no auth required) |
 
 The generated `graph-data.js` snapshot is safe for public deployment: it preserves
 every numeric node and link so the public Galaxy matches the complete vault topology.
@@ -86,7 +85,7 @@ never enters the deployed file.
 - `galaxy.css` — galaxy HUD, daytime rail, source panel, responsive layout
 - `server.js` — vault graph, chat router/tools, recall endpoint, TTS, logging
 - `build-static-graph.js` — refreshes the public read-only `graph-data.js` snapshot
-- `remote-config.js` — public tunnel address only; never contains the access code
+- `remote-config.js` — public tunnel address only
 
 ## Quick checks
 
@@ -99,10 +98,10 @@ never enters the deployed file.
    processing, and speaking.
 
 Secrets remain server-side in `FGA-AIOS/.env`; they are never sent to the browser.
-The rotating showcase code and signing secret live only in
-`private/jarvis/remote-access.json`. Remote requests are origin-restricted,
-rate-limited, and require a signed bearer session. Keep the Mac, `server.js`, and the
-configured tunnel running while presenting from the GitHub Pages URL.
+CORE LINK has no access code or login — remote requests are origin-restricted and
+rate-limited only. Anyone with the public URL and tunnel reachable gets full live
+vault/calendar/memory/tool access with no authentication. Keep the Mac, `server.js`,
+and the configured tunnel running while presenting from the GitHub Pages URL.
 Raw Messages files stay local and are never shipped in the public display deck. A
 bounded staffing/business context is sent only to configured Cortana model/voice
 providers for private assistant operation.
