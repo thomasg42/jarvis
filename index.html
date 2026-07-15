@@ -608,6 +608,20 @@
   .sysList { margin: 0; padding-left: 16px; color: var(--muted); font-size: 10.5px; }
   .sysList li { margin: 4px 0; }
   .sysList li b { color: var(--ink); font-weight: 600; }
+  .sysErr { color: var(--red); font-size: 10px; margin-top: 2px; display: block; }
+  .toolCat { border: 1px solid var(--line); border-radius: 3px; margin-bottom: 6px; background: rgba(53,255,157,.03); }
+  .toolCat summary {
+    cursor: pointer; padding: 6px 10px; font-size: 10px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink); display: flex; align-items: center; gap: 7px;
+  }
+  .toolCat summary::-webkit-details-marker { display: none; }
+  .toolCat summary .cnt { color: var(--muted); text-transform: none; letter-spacing: 0; margin-left: auto; font-size: 10px; }
+  .toolRow { padding: 5px 10px 5px 24px; border-top: 1px solid rgba(53,255,157,.06); }
+  .toolRow .tname { color: var(--gold); font-size: 10.5px; font-family: monospace; }
+  .toolRow .tdesc { color: var(--muted); font-size: 10px; display: block; margin-top: 1px; }
+  .futureRow { padding: 5px 0; border-bottom: 1px solid rgba(53,255,157,.06); }
+  .futureRow .fname { color: var(--muted); font-size: 10.5px; letter-spacing: .06em; }
+  .futureRow .fdesc { color: var(--muted); font-size: 10px; opacity: .75; display: block; }
 
   @media (max-width: 720px) {
     #vault { width: 78vw; }
@@ -1345,7 +1359,7 @@ async function loadCortanaRig() {
   const mount = avatar && avatar.querySelector('.rigMount');
   if (!mount) return;
   try {
-    const response = await fetch('assets/cortana-h4-rig.svg?v=20260715-h4art2');
+    const response = await fetch('assets/cortana-h4-rig.svg?v=20260715-h5real');
     if (!response.ok) throw new Error(`rig ${response.status}`);
     const source = await response.text();
     const doc = new DOMParser().parseFromString(source, 'image/svg+xml');
@@ -1607,7 +1621,9 @@ function renderSysPanel() {
   for (const p of switchboard.providers) {
     html += '<div class="sysRow">' + dot(p.ready) +
       '<span class="sname">' + esc(MODEL_SHORT[p.id] || p.id) + '</span>' +
-      '<span class="sdesc"><b style="color:var(--ink)">' + esc(p.label) + '</b> · ' + esc((p.models || [p.model]).join(' / ')) + ' — ' + esc(p.strengths) + '</span></div>';
+      '<span class="sdesc"><b style="color:var(--ink)">' + esc(p.label) + '</b> · ' + esc((p.models || [p.model]).join(' / ')) + ' — ' + esc(p.strengths) +
+      (p.error ? '<span class="sysErr">✕ ' + esc(p.error) + '</span>' : '') +
+      '</span></div>';
   }
   const sp = switchboard.spend;
   if (sp) {
@@ -1626,6 +1642,29 @@ function renderSysPanel() {
   for (const [name, on, desc] of caps) {
     html += '<div class="sysRow">' + dot(!!on) + '<span class="sname">' + name + '</span><span class="sdesc">' + desc + '</span></div>';
   }
+
+  const tools = switchboard.tools || [];
+  if (tools.length) {
+    const catLabels = { vault: 'Vault', appleMessages: 'Apple Messages', webSearch: 'Web', google: 'Google', spotify: 'Spotify', n8n: 'n8n', spend: 'Spend', other: 'Other' };
+    const byCat = {};
+    for (const t of tools) (byCat[t.category] = byCat[t.category] || []).push(t);
+    html += '<div class="sysH">Tool Inventory — ' + tools.length + ' wired in</div>';
+    for (const [cat, list] of Object.entries(byCat)) {
+      html += '<details class="toolCat"><summary>' + dot(!!cap[cat]) + esc(catLabels[cat] || cat) + '<span class="cnt">' + list.length + '</span></summary>';
+      for (const t of list) {
+        html += '<div class="toolRow"><span class="tname">' + esc(t.name) + '()</span><span class="tdesc">' + esc(t.description || '') + '</span></div>';
+      }
+      html += '</details>';
+    }
+  }
+  const future = switchboard.notYetConnected || [];
+  if (future.length) {
+    html += '<div class="sysH">Possible to Connect (not wired yet)</div>';
+    for (const f of future) {
+      html += '<div class="futureRow"><span class="fname">○ ' + esc(f.name) + '</span><span class="fdesc">' + esc(f.description) + '</span></div>';
+    }
+  }
+
   html += '<div class="sysH">Do</div><ul class="sysList">' + [
     '<b>Just talk.</b> Auto picks the company, exact model, and effort for every mission.',
     'Say <b>"go deep"</b> to force Fable, <b>"cheap mode"</b> for Haiku, or <b>"ask perplexity / gpt / grok"</b> to force a lane — or tap a provider and effort pill.',
