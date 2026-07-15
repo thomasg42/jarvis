@@ -1434,7 +1434,7 @@ async function loadCortanaRig() {
   const mount = avatar && avatar.querySelector('.rigMount');
   if (!mount) return;
   try {
-    const response = await fetch('assets/cortana-h4-rig.svg?v=20260715-corelink');
+    const response = await fetch('assets/cortana-h4-rig.svg?v=20260715-h4art2');
     if (!response.ok) throw new Error(`rig ${response.status}`);
     const source = await response.text();
     const doc = new DOMParser().parseFromString(source, 'image/svg+xml');
