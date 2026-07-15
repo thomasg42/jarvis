@@ -123,153 +123,250 @@
     return new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffc8a0, size: .045, transparent: true, opacity: .48, depthWrite: false }));
   }
 
-  /* Inner habitable surface — matched to Installation 04 reference imagery:
-     an Earth-like strip of oceans, green/tan continents, glaciers and swirling
-     clouds, with the atmosphere shading into the retaining walls on both rims. */
+  function finishHaloTexture(canvas) {
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.generateMipmaps = true;
+    tex.anisotropy = renderer?.capabilities?.getMaxAnisotropy
+      ? Math.min(16, renderer.capabilities.getMaxAnisotropy())
+      : 1;
+    if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  /* Inner habitable surface — a sharp 4K map with hard coastlines, terrain
+     ridges, rivers, ice, cloud lanes, and distinct retaining-wall shadows. */
   function haloTerrainTexture() {
-    const W = 2048, H = 256;
+    const W = 4096, H = 512;
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');
     const sea = ctx.createLinearGradient(0, 0, 0, H);
-    sea.addColorStop(0, '#24333c'); sea.addColorStop(.16, '#1d4e68');
-    sea.addColorStop(.5, '#2a6e90'); sea.addColorStop(.84, '#1d4e68');
-    sea.addColorStop(1, '#24333c');
+    sea.addColorStop(0, '#111b24'); sea.addColorStop(.09, '#183849');
+    sea.addColorStop(.24, '#17627f'); sea.addColorStop(.5, '#237fa2');
+    sea.addColorStop(.76, '#17627f'); sea.addColorStop(.91, '#183849');
+    sea.addColorStop(1, '#111b24');
     ctx.fillStyle = sea; ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(170,225,250,.08)';
+    ctx.lineWidth = 1;
+    for (let y = 64; y < H - 64; y += 32) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
     let s = 7;
     const rnd = () => rand(s++);
-    const blob = (x, y, r, color, alpha) => {
-      const g = ctx.createRadialGradient(x, y, r * .12, x, y, r);
-      g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.globalAlpha = alpha; ctx.fillStyle = g;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
-      ctx.globalAlpha = 1;
+    const drawPolygon = (points, off, fill, stroke, width = 2) => {
+      ctx.beginPath();
+      ctx.moveTo(points[0][0] + off, points[0][1]);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0] + off, points[i][1]);
+      ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
+      ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.stroke();
     };
-    const LAND = ['#3e5d33', '#49683a', '#6b6b40', '#8a7a4e', '#57713d'];
-    for (let i = 0; i < 34; i++) { // continents: clusters of soft landmass blobs
-      const cx = rnd() * W, cy = 46 + rnd() * (H - 92), size = 34 + rnd() * 100;
-      const n = 12 + Math.floor(rnd() * 12);
-      for (let j = 0; j < n; j++) {
-        const px = cx + (rnd() - .5) * size * 2.2, py = cy + (rnd() - .5) * size * .8;
-        const pr = 9 + rnd() * size * .45;
-        const col = LAND[Math.floor(rnd() * LAND.length)];
-        const a = .62 + rnd() * .3;
-        for (const off of [-W, 0, W]) blob(px + off, py, pr, col, a);
+
+    const LAND = ['#355b38', '#3f7041', '#607340', '#756e3e', '#8a7947'];
+    for (let i = 0; i < 36; i++) {
+      const cx = rnd() * W, cy = 76 + rnd() * (H - 152);
+      const rx = 48 + rnd() * 150, ry = 24 + rnd() * 72;
+      const points = [];
+      const count = 22 + Math.floor(rnd() * 12);
+      for (let p = 0; p < count; p++) {
+        const a = p / count * Math.PI * 2;
+        const rough = .72 + rnd() * .42;
+        points.push([cx + Math.cos(a) * rx * rough, cy + Math.sin(a) * ry * rough]);
       }
-    }
-    for (let i = 0; i < 12; i++) { // glaciers hugging the rim walls
-      const px = rnd() * W, py = rnd() < .5 ? 30 + rnd() * 26 : H - 30 - rnd() * 26;
-      const pr = 10 + rnd() * 26;
-      for (const off of [-W, 0, W]) blob(px + off, py, pr, '#dbe7ee', .5);
-    }
-    for (let i = 0; i < 70; i++) { // cloud streaks
-      const px = rnd() * W, py = 22 + rnd() * (H - 44);
-      const len = 30 + rnd() * 130, th = 3 + rnd() * 7, a = (rnd() - .5) * .5;
-      ctx.globalAlpha = .12 + rnd() * .28;
-      ctx.fillStyle = '#f4f9ff';
+      const color = LAND[Math.floor(rnd() * LAND.length)];
       for (const off of [-W, 0, W]) {
-        ctx.save(); ctx.translate(px + off, py); ctx.rotate(a);
-        ctx.beginPath(); ctx.ellipse(0, 0, len, th, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        drawPolygon(points, off, color, 'rgba(183,203,137,.56)', 2.2);
+        ctx.strokeStyle = 'rgba(28,52,31,.72)'; ctx.lineWidth = 1.2;
+        for (let ridge = 0; ridge < 5; ridge++) {
+          const yy = cy + (ridge - 2) * ry * .22;
+          ctx.beginPath();
+          ctx.moveTo(cx - rx * .62 + off, yy);
+          ctx.bezierCurveTo(cx - rx * .22 + off, yy - 18, cx + rx * .18 + off, yy + 20, cx + rx * .62 + off, yy - 4);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(134,211,238,.74)'; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(cx - rx * .12 + off, cy - ry * .6);
+        ctx.bezierCurveTo(cx + rx * .08 + off, cy - ry * .15, cx - rx * .18 + off, cy + ry * .15, cx + rx * .25 + off, cy + ry * .62);
+        ctx.stroke();
       }
-      ctx.globalAlpha = 1;
     }
-    const atm = ctx.createLinearGradient(0, 0, 0, H); // rim-wall shadow + air glow
-    atm.addColorStop(0, 'rgba(18,23,29,.95)'); atm.addColorStop(.05, 'rgba(70,90,110,.55)');
-    atm.addColorStop(.14, 'rgba(140,190,235,.13)'); atm.addColorStop(.5, 'rgba(150,200,245,.03)');
-    atm.addColorStop(.86, 'rgba(140,190,235,.13)'); atm.addColorStop(.95, 'rgba(70,90,110,.55)');
-    atm.addColorStop(1, 'rgba(18,23,29,.95)');
+
+    for (let i = 0; i < 18; i++) {
+      const cx = rnd() * W, top = rnd() < .5;
+      const cy = top ? 50 + rnd() * 34 : H - 50 - rnd() * 34;
+      const rx = 24 + rnd() * 58, ry = 8 + rnd() * 18;
+      const points = [];
+      for (let p = 0; p < 12; p++) {
+        const a = p / 12 * Math.PI * 2;
+        points.push([cx + Math.cos(a) * rx * (.74 + rnd() * .32), cy + Math.sin(a) * ry * (.74 + rnd() * .32)]);
+      }
+      for (const off of [-W, 0, W]) drawPolygon(points, off, '#d8e7ec', 'rgba(255,255,255,.72)', 1.5);
+    }
+
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 92; i++) {
+      const px = rnd() * W, py = 40 + rnd() * (H - 80);
+      const len = 40 + rnd() * 180, amp = 4 + rnd() * 18;
+      ctx.globalAlpha = .18 + rnd() * .34;
+      ctx.strokeStyle = '#eef9ff'; ctx.lineWidth = 2 + rnd() * 5;
+      for (const off of [-W, 0, W]) {
+        ctx.beginPath(); ctx.moveTo(px - len * .5 + off, py);
+        ctx.bezierCurveTo(px - len * .18 + off, py - amp, px + len * .18 + off, py + amp, px + len * .5 + off, py);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+
+    const atm = ctx.createLinearGradient(0, 0, 0, H);
+    atm.addColorStop(0, 'rgba(5,10,16,.97)'); atm.addColorStop(.035, 'rgba(19,35,47,.92)');
+    atm.addColorStop(.09, 'rgba(105,182,226,.26)'); atm.addColorStop(.16, 'rgba(105,182,226,.04)');
+    atm.addColorStop(.5, 'rgba(255,255,255,0)');
+    atm.addColorStop(.84, 'rgba(105,182,226,.04)'); atm.addColorStop(.91, 'rgba(105,182,226,.26)');
+    atm.addColorStop(.965, 'rgba(19,35,47,.92)'); atm.addColorStop(1, 'rgba(5,10,16,.97)');
     ctx.fillStyle = atm; ctx.fillRect(0, 0, W, H);
-    const tex = new THREE.CanvasTexture(c);
-    tex.wrapS = THREE.RepeatWrapping;
-    return tex;
+    ctx.fillStyle = 'rgba(176,226,255,.72)';
+    ctx.fillRect(0, 43, W, 2); ctx.fillRect(0, H - 45, W, 2);
+    return finishHaloTexture(c);
   }
 
-  /* Outer hull — polished dark Forerunner metal: panel plates, seam grooves,
-     and the neat rows of blue running lights seen on the ring's exterior. */
+  /* Outer hull — a 4K hard-surface panel map with bevel lines, structural
+     channels, center rails, and precise blue running lights. */
   function haloHullTexture() {
-    const W = 2048, H = 256;
+    const W = 4096, H = 512;
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');
     const base = ctx.createLinearGradient(0, 0, 0, H);
-    base.addColorStop(0, '#3a4048'); base.addColorStop(.5, '#23272d'); base.addColorStop(1, '#3a4048');
+    base.addColorStop(0, '#4b5661'); base.addColorStop(.08, '#26313b');
+    base.addColorStop(.5, '#121b23'); base.addColorStop(.92, '#26313b'); base.addColorStop(1, '#4b5661');
     ctx.fillStyle = base; ctx.fillRect(0, 0, W, H);
-    let s = 999;
-    const rnd = () => rand(s++);
-    for (let i = 0; i < 170; i++) { // panel plates
-      const px = rnd() * W, py = rnd() * H, pw = 30 + rnd() * 120, ph = 14 + rnd() * 60;
-      ctx.globalAlpha = .1 + rnd() * .14;
-      ctx.fillStyle = rnd() < .5 ? '#181c21' : '#4a525c';
-      for (const off of [-W, 0, W]) ctx.fillRect(px + off, py, pw, ph);
-    }
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(8,10,13,.55)';
-    for (const y of [.16, .34, .5, .68, .86]) ctx.fillRect(0, y * H, W, 2); // long grooves
-    for (let i = 0; i < 46; i++) ctx.fillRect(Math.floor(rnd() * W), 0, 1.5, H); // vertical seams
-    for (const y of [.28 * H, .72 * H]) { // neatly arranged blue lights
-      for (let x = 16; x < W; x += 64) {
-        ctx.globalAlpha = .3; ctx.fillStyle = '#8fd8ff'; ctx.fillRect(x - 3, y - 3, 10, 9);
-        ctx.globalAlpha = .95; ctx.fillRect(x, y, 4, 3);
+
+    const cols = 64, rows = 8, cellW = W / cols, cellH = H / rows;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * cellW, y = row * cellH;
+        const inset = 4 + ((row + col) % 3);
+        ctx.fillStyle = (row + col) % 2 ? 'rgba(82,97,109,.24)' : 'rgba(7,13,19,.34)';
+        ctx.fillRect(x + inset, y + 5, cellW - inset * 2, cellH - 10);
+        ctx.strokeStyle = 'rgba(148,172,188,.28)'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + inset, y + 5, cellW - inset * 2, cellH - 10);
+        ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x + inset, y + cellH - 6); ctx.lineTo(x + cellW - inset, y + cellH - 6); ctx.stroke();
       }
     }
-    ctx.globalAlpha = 1;
-    const groove = ctx.createLinearGradient(0, H * .46, 0, H * .54); // glowing centerline
-    groove.addColorStop(0, 'rgba(120,200,255,0)'); groove.addColorStop(.5, 'rgba(120,200,255,.28)');
-    groove.addColorStop(1, 'rgba(120,200,255,0)');
-    ctx.fillStyle = groove; ctx.fillRect(0, H * .46, W, H * .08);
-    const tex = new THREE.CanvasTexture(c);
-    tex.wrapS = THREE.RepeatWrapping;
-    return tex;
+
+    ctx.lineWidth = 3;
+    for (let x = 0; x < W; x += 256) {
+      ctx.strokeStyle = 'rgba(5,10,14,.92)';
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 70, H * .5); ctx.lineTo(x, H); ctx.stroke();
+      ctx.strokeStyle = 'rgba(103,132,151,.34)';
+      ctx.beginPath(); ctx.moveTo(x + 6, 0); ctx.lineTo(x + 76, H * .5); ctx.lineTo(x + 6, H); ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(3,8,12,.9)'; ctx.fillRect(0, H * .46, W, H * .08);
+    ctx.fillStyle = 'rgba(92,177,224,.34)'; ctx.fillRect(0, H * .495, W, 3);
+    for (const y of [H * .2, H * .8]) {
+      for (let x = 20; x < W; x += 72) {
+        ctx.fillStyle = 'rgba(84,184,244,.22)'; ctx.fillRect(x - 5, y - 5, 18, 12);
+        ctx.fillStyle = '#bceaff'; ctx.fillRect(x, y - 2, 8, 4);
+      }
+    }
+    ctx.fillStyle = 'rgba(196,222,235,.58)';
+    ctx.fillRect(0, 5, W, 2); ctx.fillRect(0, H - 7, W, 2);
+    return finishHaloTexture(c);
   }
 
-  /* The Ring itself — a real ringworld band instead of flat glowing circles:
-     habitable terrain on the inside of a cylinder, metal hull outside, rim
-     walls holding the atmosphere, sunlight raking across it, slow spin. */
+  /* The Ring itself — high-segment scene geometry with a readable terrain
+     face, metallic shell, raised structural ribs, hard rim rails, and a thin
+     atmosphere. Nothing is blurred into a generic glowing circle. */
   function buildHaloWorld() {
     const ring = new THREE.Group();
     const tilt = new THREE.Group();
-    tilt.rotation.x = Math.PI / 2; // cylinder axis -> the old ring's normal
+    tilt.rotation.x = Math.PI / 2;
     const spinner = new THREE.Group();
     tilt.add(spinner);
     ring.add(tilt);
 
-    const R = 5.86, BAND = .62, HULL = .1;
+    const R = 5.82, BAND = .88, HULL = .14, SEGMENTS = 768;
     const terrainTex = haloTerrainTexture();
     const hullTex = haloHullTexture();
     const terrain = new THREE.Mesh(
-      new THREE.CylinderGeometry(R, R, BAND - .05, 512, 1, true),
-      new THREE.MeshLambertMaterial({
+      new THREE.CylinderGeometry(R, R, BAND - .09, SEGMENTS, 3, true),
+      new THREE.MeshPhongMaterial({
         map: terrainTex, side: THREE.BackSide,
-        emissive: 0xffffff, emissiveMap: terrainTex, emissiveIntensity: .52,
+        emissive: 0x07141d, emissiveIntensity: .58,
+        specular: 0xb9e9ff, shininess: 22,
       })
     );
     const hull = new THREE.Mesh(
-      new THREE.CylinderGeometry(R + HULL, R + HULL, BAND, 512, 1, true),
-      new THREE.MeshLambertMaterial({
-        map: hullTex, emissive: 0xffffff, emissiveMap: hullTex, emissiveIntensity: .22,
+      new THREE.CylinderGeometry(R + HULL, R + HULL, BAND, SEGMENTS, 4, true),
+      new THREE.MeshPhongMaterial({
+        map: hullTex, color: 0xffffff,
+        emissive: 0x061019, emissiveIntensity: .35,
+        specular: 0xd7efff, shininess: 105,
       })
     );
-    const wallMat = new THREE.MeshLambertMaterial({ color: 0x4a525c, emissive: 0x1c2126, side: THREE.DoubleSide });
-    const wallTop = new THREE.Mesh(new THREE.RingGeometry(R - .02, R + HULL, 512, 1), wallMat);
+    const wallMat = new THREE.MeshPhongMaterial({
+      color: 0x35434d, emissive: 0x09141d, specular: 0xaedcff,
+      shininess: 90, side: THREE.DoubleSide,
+    });
+    const wallTop = new THREE.Mesh(new THREE.RingGeometry(R - .03, R + HULL + .03, SEGMENTS, 2), wallMat);
     wallTop.rotation.x = -Math.PI / 2;
     wallTop.position.y = BAND / 2;
     const wallBot = wallTop.clone();
     wallBot.position.y = -BAND / 2;
+
+    const railMat = new THREE.MeshPhongMaterial({
+      color: 0x627583, emissive: 0x0a1c27, specular: 0xd5f2ff, shininess: 130,
+    });
+    const railTop = new THREE.Mesh(new THREE.TorusGeometry(R + .045, .058, 12, SEGMENTS), railMat);
+    railTop.rotation.x = Math.PI / 2; railTop.position.y = BAND / 2;
+    const railBot = railTop.clone(); railBot.position.y = -BAND / 2;
+
+    const ribGeo = new THREE.BoxGeometry(.035, BAND * .7, .14);
+    const ribMat = new THREE.MeshPhongMaterial({ color: 0x536573, emissive: 0x08141d, specular: 0xb8e3fb, shininess: 96 });
+    const ribs = new THREE.InstancedMesh(ribGeo, ribMat, 72);
+    const rib = new THREE.Object3D();
+    for (let i = 0; i < 72; i++) {
+      const a = i / 72 * Math.PI * 2;
+      rib.position.set(Math.cos(a) * (R + HULL + .012), 0, Math.sin(a) * (R + HULL + .012));
+      rib.rotation.y = -a;
+      rib.updateMatrix();
+      ribs.setMatrixAt(i, rib.matrix);
+    }
+    ribs.instanceMatrix.needsUpdate = true;
+
     const atmo = new THREE.Mesh(
-      new THREE.CylinderGeometry(R - .07, R - .07, BAND * .8, 256, 1, true),
+      new THREE.CylinderGeometry(R - .055, R - .055, BAND * .78, SEGMENTS, 1, true),
       new THREE.MeshBasicMaterial({
-        color: 0x8fd0ff, transparent: true, opacity: .045, side: THREE.BackSide,
+        color: 0x8fdcff, transparent: true, opacity: .052, side: THREE.BackSide,
         blending: THREE.AdditiveBlending, depthWrite: false,
       })
     );
-    spinner.add(terrain, hull, wallTop, wallBot, atmo);
+    const airRailMat = new THREE.MeshBasicMaterial({
+      color: 0x8cddff, transparent: true, opacity: .19,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const airTop = new THREE.Mesh(new THREE.TorusGeometry(R - .06, .018, 8, SEGMENTS), airRailMat);
+    airTop.rotation.x = Math.PI / 2; airTop.position.y = BAND * .39;
+    const airBot = airTop.clone(); airBot.position.y = -BAND * .39;
+    spinner.add(terrain, hull, wallTop, wallBot, railTop, railBot, ribs, atmo, airTop, airBot);
 
-    const sun = new THREE.DirectionalLight(0xfff1d8, 1.25); // only the ring is lit
-    sun.position.set(-7, 9, 6);
-    const fill = new THREE.AmbientLight(0x35424f, .9);
-    ring.add(sun, fill);
+    const sun = new THREE.DirectionalLight(0xfff2d7, 1.7);
+    sun.position.set(-8, 10, 7);
+    const coolFill = new THREE.DirectionalLight(0x7dcfff, .48);
+    coolFill.position.set(7, -3, -5);
+    const fill = new THREE.AmbientLight(0x263947, .62);
+    ring.add(sun, coolFill, fill);
 
-    ring.rotation.set(.98, .08, -.28);
+    ring.rotation.set(.96, .08, -.27);
     ring.position.set(0, -.15, -1.55);
     ring.userData.spinner = spinner;
     return ring;
@@ -373,8 +470,8 @@
     document.body.classList.toggle('galaxy-view', !!useGalaxy);
     document.querySelectorAll('.viewBtn').forEach((b) => b.classList.toggle('active', b.dataset.view === (useGalaxy ? 'galaxy' : 'core')));
     if (galaxy) galaxy.visible = !!useGalaxy;
-    // Core view now uses the Cortana image hologram. Keep the legacy orb
-    // and its miniature graph hidden; the full Galaxy remains available.
+    // Core view uses the articulated Cortana SVG hologram. Keep the legacy
+    // orb and its miniature graph hidden; the full Galaxy remains available.
     if (orbCore) orbCore.visible = false;
     if (orbAtmo) orbAtmo.visible = false;
     if (vaultGraph) vaultGraph.visible = false;

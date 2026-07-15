@@ -27,7 +27,7 @@
 
   /* ===== Cortana hologram — replaces the old orb in Core view ===== */
   #cortanaAvatar {
-    position: fixed; z-index: 3; left: 50%; top: 72px; bottom: 150px;
+    position: fixed; z-index: 3; left: 50%; top: 72px; bottom: 200px;
     width: min(48vw, 540px); transform: translateX(-50%);
     display: flex; align-items: center; justify-content: center;
     pointer-events: none; opacity: .96; visibility: visible;
@@ -64,9 +64,9 @@
   }
   #cortanaAvatar .holoFigure {
     position: relative; z-index: 1; width: 100%; height: 100%;
-    filter: drop-shadow(0 0 8px rgba(110,216,255,.62)) drop-shadow(0 0 24px var(--avatar-glow));
+    filter: drop-shadow(0 0 2px rgba(205,235,255,.82)) drop-shadow(0 0 11px var(--avatar-glow));
     transform-origin: 50% 82%; animation: cortanaFloat 4.8s ease-in-out infinite;
-    will-change: transform, filter, opacity;
+    will-change: transform, filter, opacity; shape-rendering: geometricPrecision;
   }
   #cortanaAvatar.state-listening {
     --avatar-glow: rgba(255,196,46,.62); --avatar-core: rgba(255,226,122,.25);
@@ -88,8 +88,8 @@
   }
   @keyframes cortanaFloat {
     0%, 100% { transform: translateY(0) rotateZ(-.35deg) scale(1); opacity: .94; }
-    35% { transform: translateY(-7px) rotateZ(.5deg) scale(1.007); opacity: 1; }
-    68% { transform: translateY(-3px) rotateZ(-.15deg) scale(1.003); opacity: .98; }
+    35% { transform: translateY(-2px) rotateZ(.3deg) scale(1.003); opacity: 1; }
+    68% { transform: translateY(-1px) rotateZ(-.15deg) scale(1.002); opacity: .98; }
   }
   @keyframes cortanaListen {
     0%, 100% { transform: translateY(-2px) scale(1); filter: drop-shadow(0 0 9px rgba(255,226,122,.58)) drop-shadow(0 0 24px var(--avatar-glow)); }
@@ -113,12 +113,10 @@
   @keyframes cortanaScan { from { top: 13%; opacity: 0; } 12% { opacity: .26; } 88% { opacity: .18; } to { top: 91%; opacity: 0; } }
   @keyframes avatarAura { 0%,100% { transform: translate(-50%,-50%) scale(.96); opacity: .56; } 50% { transform: translate(-50%,-50%) scale(1.05); opacity: .82; } }
 
-  /* ===== Cortana articulated rig — arms, head, eyes, mouth =====
-     The figure is an inline SVG; every joint is a group with a view-box
-     pivot so the limbs actually swing instead of the whole image sliding.
-     Feet stay planted. While speaking, tone classes (read from the reply)
-     choose the body language: tone-emphatic = yelling drive, tone-caring
-     = soft hands-to-heart. */
+  /* ===== Cortana articulated hard-light rig =====
+     Mature anatomy, complete hands/feet, face detail, and uninterrupted
+     data paths live inside the SVG. Shoulder/elbow/head pivots preserve the
+     existing listening, thinking, speaking, emphatic, and caring poses. */
   #cortanaAvatar .armR, #cortanaAvatar .armL,
   #cortanaAvatar .forearmR, #cortanaAvatar .forearmL,
   #cortanaAvatar .headGroup, #cortanaAvatar .torsoGroup,
@@ -126,17 +124,25 @@
     transform-box: view-box; will-change: transform;
   }
   #cortanaAvatar .eye { transform-box: fill-box; transform-origin: 50% 50%; animation: cBlink 4.6s infinite; }
-  #cortanaAvatar .armR { transform-origin: 116px 158px; animation: cArmIdleR 6.4s ease-in-out infinite; }
-  #cortanaAvatar .armL { transform-origin: 204px 158px; animation: cArmIdleL 7.2s ease-in-out infinite; }
-  #cortanaAvatar .forearmR { transform-origin: 114px 236px; animation: cForeIdleR 6.4s ease-in-out infinite; }
-  #cortanaAvatar .forearmL { transform-origin: 206px 236px; animation: cForeIdleL 7.2s ease-in-out infinite; }
-  #cortanaAvatar .headGroup { transform-origin: 160px 130px; animation: cHeadIdle 8.4s ease-in-out infinite; }
-  #cortanaAvatar .torsoGroup { transform-origin: 160px 302px; animation: cBreathe 4.8s ease-in-out infinite; }
-  #cortanaAvatar .mouthOpen { transform-origin: 160px 111px; transform: scale(.9, .12); }
-  #cortanaAvatar .lipLine, #cortanaAvatar .lipSmile { transform-origin: 160px 111px; transition: opacity .3s; }
+  #cortanaAvatar .armR { transform-origin: 145px 190px; animation: cArmIdleR 6.4s ease-in-out infinite; }
+  #cortanaAvatar .armL { transform-origin: 275px 190px; animation: cArmIdleL 7.2s ease-in-out infinite; }
+  #cortanaAvatar .forearmR { transform-origin: 126px 292px; animation: cForeIdleR 6.4s ease-in-out infinite; }
+  #cortanaAvatar .forearmL { transform-origin: 294px 292px; animation: cForeIdleL 7.2s ease-in-out infinite; }
+  #cortanaAvatar .headGroup { transform-origin: 210px 171px; animation: cHeadIdle 8.4s ease-in-out infinite; }
+  #cortanaAvatar .torsoGroup { transform-origin: 210px 358px; animation: cBreathe 4.8s ease-in-out infinite; }
+  #cortanaAvatar .mouthOpen { transform-origin: 210px 142px; transform: scale(.9, .12); }
+  #cortanaAvatar .lipLine, #cortanaAvatar .lipSmile { transform-origin: 210px 142px; transition: opacity .3s; }
   #cortanaAvatar .lipSmile { opacity: 0; }
-  #cortanaAvatar .acc { fill: none; stroke: #cfe2ff; stroke-width: 1; opacity: .3; }
-  #cortanaAvatar .brow { fill: none; stroke: #22307f; stroke-width: 1.6; stroke-linecap: round; }
+  #cortanaAvatar .cPanel { fill: none; stroke: rgba(205,232,255,.62); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
+  #cortanaAvatar .cCircuit { fill: none; stroke: #9ff8ff; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #cortanaAvatar .cCircuit.hot { stroke: #f1fbff; stroke-width: 1.75; }
+  #cortanaAvatar .circuitFlow { stroke-dasharray: 5 8; animation: cDataFlow 2.8s linear infinite; }
+  #cortanaAvatar .cNode { fill: #f5fdff; stroke: #6feaff; stroke-width: .8; vector-effect: non-scaling-stroke; }
+  #cortanaAvatar .finger, #cortanaAvatar .toe { fill: none; stroke: rgba(225,242,255,.8); stroke-width: 1; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  #cortanaAvatar .brow { fill: none; stroke: #263785; stroke-width: 1.7; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  #cortanaAvatar .faceLine { fill: none; stroke: rgba(39,55,126,.72); stroke-width: 1.05; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  #cortanaAvatar .hairLine { fill: none; stroke: rgba(166,199,255,.48); stroke-width: 1.1; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  @keyframes cDataFlow { to { stroke-dashoffset: -26; } }
   @keyframes cBreathe { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.012,1.022) translateY(-1.2px); } }
   @keyframes cHeadIdle { 0%,100% { transform: rotate(-1.2deg); } 42% { transform: rotate(1.6deg); } 74% { transform: rotate(.3deg); } }
   @keyframes cBlink { 0%,91.5%,95.5%,100% { transform: scaleY(1); } 93.5% { transform: scaleY(.06); } }
@@ -354,12 +360,12 @@
   #haloRing::before { /* lit inner band — the Ring's habitable surface */
     content: ""; position: absolute; inset: .35vmax; border-radius: 50%;
     border: .28vmax solid rgba(255,196,46,.32);
-    filter: blur(.6px);
+    filter: none;
   }
   #haloRing::after { /* faint atmosphere haze hugging the arc */
     content: ""; position: absolute; inset: -2.2vmax; border-radius: 50%;
-    border: 2.2vmax solid rgba(140,255,200,.05);
-    filter: blur(6px);
+    border: 1.4vmax solid rgba(140,255,200,.035);
+    filter: blur(2px);
   }
   @media (max-width: 720px) { #haloRing { top: -140vmax; } }
 
@@ -565,7 +571,7 @@
     #opsDock { width: 160px; right: 8px; }
     #opsToggle { right: 8px; }
     #beam { width: 60vmin; }
-    #cortanaAvatar { top: 78px; bottom: 154px; width: min(76vw, 430px); opacity: .9; }
+    #cortanaAvatar { top: 78px; bottom: 190px; width: min(76vw, 430px); opacity: .9; }
     #cortanaAvatar::before { width: min(70vw, 390px); }
     #cortanaAvatar::after { width: min(44vw, 230px); }
     #orbStatus { bottom: 134px; }
@@ -582,80 +588,102 @@
   <div class="cortanaBody">
     <!-- Articulated Cortana hologram: feet planted, shoulder/elbow/head/mouth
          joints animate per state. Replaces the flat PNG render. -->
-    <svg class="holoFigure" viewBox="0 0 320 540" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+    <svg class="holoFigure" viewBox="0 0 420 720" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
       <defs>
-        <!-- userSpaceOnUse: one continuous light falloff across every body
-             part so the shoulder/elbow joint caps blend invisibly -->
-        <linearGradient id="cSkin" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="530">
-          <stop offset="0" stop-color="#b7d2ff"/><stop offset=".45" stop-color="#6d8bf6"/><stop offset="1" stop-color="#33489f"/>
+        <linearGradient id="cSkin" gradientUnits="userSpaceOnUse" x1="126" y1="52" x2="286" y2="696">
+          <stop offset="0" stop-color="#d9e7ff"/><stop offset=".2" stop-color="#9db9ff"/><stop offset=".58" stop-color="#6e83ea"/><stop offset="1" stop-color="#34489f"/>
         </linearGradient>
-        <linearGradient id="cSkinSide" gradientUnits="userSpaceOnUse" x1="96" y1="0" x2="224" y2="0">
-          <stop offset="0" stop-color="#a3bfff"/><stop offset=".55" stop-color="#5f7ae8"/><stop offset="1" stop-color="#34499f"/>
+        <linearGradient id="cSkinSide" gradientUnits="userSpaceOnUse" x1="108" y1="0" x2="312" y2="0">
+          <stop offset="0" stop-color="#6680de"/><stop offset=".42" stop-color="#bdd1ff"/><stop offset=".58" stop-color="#9db7ff"/><stop offset="1" stop-color="#455bb5"/>
         </linearGradient>
-        <linearGradient id="cHair" gradientUnits="userSpaceOnUse" x1="0" y1="34" x2="0" y2="140">
-          <stop offset="0" stop-color="#33409f"/><stop offset="1" stop-color="#10195a"/>
+        <linearGradient id="cHair" gradientUnits="userSpaceOnUse" x1="0" y1="48" x2="0" y2="205">
+          <stop offset="0" stop-color="#253887"/><stop offset=".46" stop-color="#172663"/><stop offset="1" stop-color="#0b1748"/>
         </linearGradient>
-        <pattern id="cLines" width="7" height="5" patternUnits="userSpaceOnUse">
-          <rect y="3.4" width="7" height="1.1" fill="#d5e4ff"/>
-          <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="0 5" dur="1.5s" repeatCount="indefinite"/>
+        <linearGradient id="cFaceLight" gradientUnits="userSpaceOnUse" x1="180" y1="78" x2="244" y2="162">
+          <stop offset="0" stop-color="#eaf2ff" stop-opacity=".72"/><stop offset="1" stop-color="#6d81df" stop-opacity=".1"/>
+        </linearGradient>
+        <pattern id="cMicro" width="12" height="9" patternUnits="userSpaceOnUse">
+          <path d="M0 7.5 H12" stroke="#e9f7ff" stroke-width=".7" opacity=".38"/>
+          <path d="M3 0 V9 M9 0 V9" stroke="#76e8ff" stroke-width=".35" opacity=".18"/>
         </pattern>
-        <radialGradient id="cFade" cx=".5" cy=".5" r=".5">
-          <stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
-        </radialGradient>
-        <mask id="cMask"><ellipse cx="160" cy="290" rx="125" ry="250" fill="url(#cFade)"/></mask>
       </defs>
       <g class="figureRoot">
         <g class="legs">
-          <path fill="url(#cSkinSide)" d="M129 292 C123 366 133 448 141 514 L159 514 C157 448 155 368 157 294 Z"/>
-          <path fill="url(#cSkinSide)" d="M191 292 C197 366 187 448 179 514 L161 514 C163 448 165 368 163 294 Z"/>
-          <path fill="#3d55c8" d="M137 512 C134 522 138 528 148 528 L158 528 L159 514 L141 514 Z"/>
-          <path fill="#3d55c8" d="M183 512 C186 522 182 528 172 528 L162 528 L161 514 L179 514 Z"/>
-          <ellipse cx="146" cy="402" rx="5" ry="96" fill="#dfe9ff" opacity=".1"/>
-          <ellipse cx="174" cy="402" rx="5" ry="96" fill="#dfe9ff" opacity=".1"/>
+          <path fill="url(#cSkinSide)" d="M163 349 C158 403 159 452 164 496 C168 535 171 586 174 648 L201 648 C200 590 203 532 205 490 L205 357 C191 349 177 347 163 349 Z"/>
+          <path fill="url(#cSkinSide)" d="M257 349 C262 403 261 452 256 496 C252 535 249 586 246 648 L219 648 C220 590 217 532 215 490 L215 357 C229 349 243 347 257 349 Z"/>
+          <path fill="url(#cMicro)" opacity=".28" d="M163 349 C158 403 159 452 164 496 C168 535 171 586 174 648 L201 648 C200 590 203 532 205 490 L205 357 C191 349 177 347 163 349 Z"/>
+          <path fill="url(#cMicro)" opacity=".28" d="M257 349 C262 403 261 452 256 496 C252 535 249 586 246 648 L219 648 C220 590 217 532 215 490 L215 357 C229 349 243 347 257 349 Z"/>
+          <path fill="url(#cSkinSide)" d="M174 640 C171 658 166 675 160 685 C164 695 177 699 197 698 L211 697 L202 646 Z"/>
+          <path fill="url(#cSkinSide)" d="M246 640 C249 658 254 675 260 685 C256 695 243 699 223 698 L209 697 L218 646 Z"/>
+          <path class="cPanel" d="M164 486 Q184 499 204 487 M169 548 Q185 558 201 549 M216 487 Q236 499 256 486 M219 549 Q235 558 251 548"/>
+          <path class="cCircuit circuitFlow hot" d="M181 687 L181 594 L178 516 L184 430 L186 355 M239 687 L239 594 L242 516 L236 430 L234 355"/>
+          <path class="cCircuit" d="M194 646 L191 568 L196 520 M226 646 L229 568 L224 520"/>
+          <circle class="cNode" cx="181" cy="594" r="2.2"/><circle class="cNode" cx="178" cy="516" r="2.2"/>
+          <circle class="cNode" cx="239" cy="594" r="2.2"/><circle class="cNode" cx="242" cy="516" r="2.2"/>
+          <path class="toe" d="M164 685 Q183 691 205 687 M168 679 L166 690 M177 682 L176 695 M188 683 L188 697 M256 685 Q237 691 215 687 M252 679 L254 690 M243 682 L244 695 M232 683 L232 697"/>
         </g>
         <g class="torsoGroup">
-          <path fill="url(#cSkin)" d="M132 146 C112 152 106 168 112 188 C118 208 124 222 134 236 C118 254 112 274 115 294 C117 308 132 312 160 312 C188 312 203 308 205 294 C208 274 202 254 186 236 C196 222 202 208 208 188 C214 168 208 152 188 146 C169 141 151 141 132 146 Z"/>
-          <ellipse cx="160" cy="212" rx="17" ry="66" fill="#e2ebff" opacity=".13"/>
-          <path class="acc" d="M138 162 C150 170 170 170 182 162"/>
-          <path class="acc" d="M136 246 C148 254 172 254 184 246"/>
-          <path class="acc" d="M160 150 L160 234"/>
+          <path fill="url(#cSkin)" d="M166 183 C146 190 138 207 142 231 C146 258 156 282 170 307 C161 327 157 350 161 370 C175 382 245 382 259 370 C263 350 259 327 250 307 C264 282 274 258 278 231 C282 207 274 190 254 183 C239 178 226 176 210 176 C194 176 181 178 166 183 Z"/>
+          <path fill="url(#cMicro)" opacity=".24" d="M166 183 C146 190 138 207 142 231 C146 258 156 282 170 307 C161 327 157 350 161 370 C175 382 245 382 259 370 C263 350 259 327 250 307 C264 282 274 258 278 231 C282 207 274 190 254 183 C239 178 226 176 210 176 C194 176 181 178 166 183 Z"/>
+          <path fill="url(#cFaceLight)" opacity=".34" d="M177 188 C192 181 207 181 210 181 L210 367 C190 365 178 356 176 338 C174 315 184 298 183 281 C182 251 167 224 177 188 Z"/>
+          <path class="cPanel" d="M169 197 Q210 219 251 197 M153 246 Q210 270 267 246 M170 307 Q210 322 250 307 M163 355 Q210 371 257 355 M210 181 V365"/>
+          <path class="cCircuit circuitFlow hot" d="M186 355 L185 319 L199 297 L199 257 L190 237 L195 195 L201 178 M234 355 L235 319 L221 297 L221 257 L230 237 L225 195 L219 178"/>
+          <path class="cCircuit" d="M166 279 L188 279 L201 266 M254 279 L232 279 L219 266 M177 336 L199 336 L210 348 L221 336 L243 336"/>
+          <circle class="cNode" cx="199" cy="297" r="2.4"/><circle class="cNode" cx="221" cy="297" r="2.4"/>
+          <circle class="cNode" cx="190" cy="237" r="2.2"/><circle class="cNode" cx="230" cy="237" r="2.2"/>
         </g>
         <g class="arm armR">
-          <circle cx="117" cy="159" r="10" fill="url(#cSkinSide)"/>
-          <path fill="url(#cSkinSide)" d="M124 150 C110 151 103 161 103 172 C103 184 106 214 108 234 C109 242 120 242 121 234 C123 214 127 184 127 170 C127 159 129 152 124 150 Z"/>
+          <path fill="url(#cSkinSide)" d="M150 184 C133 184 123 198 123 218 C123 241 126 268 126 292 C126 302 139 304 143 294 C149 269 155 239 160 213 C163 197 159 188 150 184 Z"/>
+          <path fill="url(#cMicro)" opacity=".25" d="M150 184 C133 184 123 198 123 218 C123 241 126 268 126 292 C126 302 139 304 143 294 C149 269 155 239 160 213 C163 197 159 188 150 184 Z"/>
+          <path class="cPanel" d="M128 226 Q141 232 154 226 M127 272 Q137 277 147 272"/>
+          <path class="cCircuit circuitFlow" d="M146 192 L139 230 L139 272 L133 292"/>
           <g class="forearm forearmR">
-            <circle cx="114" cy="236" r="6.5" fill="url(#cSkinSide)"/>
-            <path fill="url(#cSkinSide)" d="M108 232 C105 240 105 252 107 264 L111 298 C112 306 120 306 120 298 L122 260 C123 248 122 238 121 232 C117 238 112 238 108 232 Z"/>
-            <ellipse class="hand" cx="115" cy="306" rx="6.5" ry="10.5" fill="url(#cSkinSide)"/>
+            <path fill="url(#cSkinSide)" d="M120 288 C116 307 116 333 117 360 C118 371 132 373 136 362 C141 337 143 311 141 292 C136 299 126 299 120 288 Z"/>
+            <path fill="url(#cMicro)" opacity=".24" d="M120 288 C116 307 116 333 117 360 C118 371 132 373 136 362 C141 337 143 311 141 292 C136 299 126 299 120 288 Z"/>
+            <path class="cCircuit circuitFlow" d="M132 295 L127 326 L127 362"/>
+            <path fill="url(#cSkinSide)" d="M119 359 C112 364 108 374 109 386 L110 404 C111 411 116 411 118 406 L119 389 L120 412 C121 418 125 418 127 412 L127 389 L129 408 C130 414 134 413 135 408 L134 385 L137 400 C138 405 142 403 141 397 L137 372 C135 362 128 357 119 359 Z"/>
+            <path class="finger" d="M118 379 L118 405 M123 378 L124 412 M128 378 L131 407 M133 377 L138 398"/>
+            <circle class="cNode" cx="127" cy="362" r="2"/>
           </g>
         </g>
         <g class="arm armL">
-          <circle cx="203" cy="159" r="10" fill="url(#cSkinSide)"/>
-          <path fill="url(#cSkinSide)" d="M196 150 C210 151 217 161 217 172 C217 184 214 214 212 234 C211 242 200 242 199 234 C197 214 193 184 193 170 C193 159 191 152 196 150 Z"/>
+          <path fill="url(#cSkinSide)" d="M270 184 C287 184 297 198 297 218 C297 241 294 268 294 292 C294 302 281 304 277 294 C271 269 265 239 260 213 C257 197 261 188 270 184 Z"/>
+          <path fill="url(#cMicro)" opacity=".25" d="M270 184 C287 184 297 198 297 218 C297 241 294 268 294 292 C294 302 281 304 277 294 C271 269 265 239 260 213 C257 197 261 188 270 184 Z"/>
+          <path class="cPanel" d="M292 226 Q279 232 266 226 M293 272 Q283 277 273 272"/>
+          <path class="cCircuit circuitFlow" d="M274 192 L281 230 L281 272 L287 292"/>
           <g class="forearm forearmL">
-            <circle cx="206" cy="236" r="6.5" fill="url(#cSkinSide)"/>
-            <path fill="url(#cSkinSide)" d="M212 232 C215 240 215 252 213 264 L209 298 C208 306 200 306 200 298 L198 260 C197 248 198 238 199 232 C203 238 208 238 212 232 Z"/>
-            <ellipse class="hand" cx="205" cy="306" rx="6.5" ry="10.5" fill="url(#cSkinSide)"/>
+            <path fill="url(#cSkinSide)" d="M300 288 C304 307 304 333 303 360 C302 371 288 373 284 362 C279 337 277 311 279 292 C284 299 294 299 300 288 Z"/>
+            <path fill="url(#cMicro)" opacity=".24" d="M300 288 C304 307 304 333 303 360 C302 371 288 373 284 362 C279 337 277 311 279 292 C284 299 294 299 300 288 Z"/>
+            <path class="cCircuit circuitFlow" d="M288 295 L293 326 L293 362"/>
+            <path fill="url(#cSkinSide)" d="M301 359 C308 364 312 374 311 386 L310 404 C309 411 304 411 302 406 L301 389 L300 412 C299 418 295 418 293 412 L293 389 L291 408 C290 414 286 413 285 408 L286 385 L283 400 C282 405 278 403 279 397 L283 372 C285 362 292 357 301 359 Z"/>
+            <path class="finger" d="M302 379 L302 405 M297 378 L296 412 M292 378 L289 407 M287 377 L282 398"/>
+            <circle class="cNode" cx="293" cy="362" r="2"/>
           </g>
         </g>
         <g class="headGroup">
-          <path fill="#4a5fd0" d="M149 112 L171 112 L173 142 C166 149 154 149 147 142 Z"/>
-          <path fill="url(#cHair)" d="M126 92 C120 48 138 32 160 32 C182 32 200 48 194 92 C193 110 187 124 179 132 C183 114 183 98 180 84 L140 84 C137 98 137 114 141 132 C133 124 127 110 126 92 Z"/>
-          <path fill="url(#cSkin)" d="M136 86 C136 62 146 50 160 50 C174 50 184 62 184 86 C184 106 173 124 160 124 C147 124 136 106 136 86 Z"/>
-          <path fill="url(#cHair)" d="M134 84 C134 54 146 42 160 42 C174 42 186 54 186 84 C186 88 184 90 183 86 C181 74 176 67 168 64 C157 72 144 72 138 84 C136 88 134 88 134 84 Z"/>
-          <path class="brow" d="M143 83 Q149 79.5 155 82.5"/>
-          <path class="brow" d="M165 82.5 Q171 79.5 177 83"/>
-          <g class="eye"><ellipse cx="149" cy="90" rx="4.8" ry="2.7" fill="#dceafe"/><circle cx="149.5" cy="90.2" r="1.8" fill="#0e1a4e"/></g>
-          <g class="eye"><ellipse cx="171" cy="90" rx="4.8" ry="2.7" fill="#dceafe"/><circle cx="170.5" cy="90.2" r="1.8" fill="#0e1a4e"/></g>
-          <path d="M160 95 L158.8 102 L161.2 102" fill="none" stroke="#31449f" stroke-width="1" opacity=".55"/>
+          <path fill="url(#cSkinSide)" d="M193 151 L227 151 L230 181 C220 191 200 191 190 181 Z"/>
+          <path fill="url(#cHair)" d="M166 118 C157 83 169 51 194 40 C219 29 248 42 258 68 C267 92 262 135 251 164 L239 190 C239 165 244 141 241 116 L179 116 C176 142 181 166 181 190 L169 164 C164 145 162 130 166 118 Z"/>
+          <path fill="url(#cSkinSide)" d="M171 108 C164 107 162 117 166 128 C168 134 173 136 176 131 L176 110 Z M249 108 C256 107 258 117 254 128 C252 134 247 136 244 131 L244 110 Z"/>
+          <path fill="url(#cSkin)" d="M174 96 C174 66 188 49 210 49 C232 49 246 66 246 96 C246 126 232 158 210 166 C188 158 174 126 174 96 Z"/>
+          <path fill="url(#cFaceLight)" d="M181 87 C185 62 196 52 211 52 C210 87 208 123 210 160 C193 153 182 126 181 87 Z"/>
+          <path fill="url(#cHair)" d="M170 97 C168 67 181 43 207 39 C232 35 250 53 252 82 C251 94 246 101 242 105 C241 84 231 68 218 62 C203 77 185 78 177 101 C173 107 170 105 170 97 Z"/>
+          <path fill="#2a3d8f" opacity=".82" d="M173 97 C166 112 168 142 177 165 L187 181 C182 156 184 133 185 113 Z M247 97 C254 112 252 142 243 165 L233 181 C238 156 236 133 235 113 Z"/>
+          <path class="cPanel" d="M187 151 Q210 159 233 151"/>
+          <path class="brow" d="M184 105 Q195 99 204 104 M216 104 Q225 99 236 105"/>
+          <g class="eye"><path d="M184 116 Q194 108 204 116 Q194 123 184 116 Z" fill="#edf8ff"/><circle cx="195" cy="116" r="3.4" fill="#16265c"/><circle cx="196" cy="115" r="1.1" fill="#baf7ff"/></g>
+          <g class="eye"><path d="M216 116 Q226 108 236 116 Q226 123 216 116 Z" fill="#edf8ff"/><circle cx="225" cy="116" r="3.4" fill="#16265c"/><circle cx="224" cy="115" r="1.1" fill="#baf7ff"/></g>
+          <path class="faceLine" d="M210 118 L207 133 Q210 136 214 133 M191 145 Q210 151 229 145 M183 126 Q188 142 195 153 M237 126 Q232 142 225 153"/>
           <g class="mouth">
-            <ellipse class="mouthOpen" cx="160" cy="111" rx="8" ry="5" fill="#0d1846"/>
-            <path class="lipLine" d="M152 111 Q160 114 168 111" stroke="#25348a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-            <path class="lipSmile" d="M151 109 Q160 116 169 109" stroke="#2c3f9e" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+            <ellipse class="mouthOpen" cx="210" cy="144" rx="11" ry="6.5" fill="#0b173e"/>
+            <path class="lipLine" d="M199 144 Q210 149 221 144" stroke="#273888" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path class="lipSmile" d="M198 141 Q210 152 222 141" stroke="#3451aa" stroke-width="2" fill="none" stroke-linecap="round"/>
           </g>
+          <path class="cCircuit circuitFlow hot" d="M198 178 L198 159 L188 151 L188 132 L178 124 M222 178 L222 159 L232 151 L232 132 L242 124"/>
+          <path class="cCircuit" d="M180 91 L193 91 L202 80 M240 91 L227 91 L218 80"/>
+          <circle class="cNode" cx="188" cy="132" r="2"/><circle class="cNode" cx="232" cy="132" r="2"/>
+          <path class="hairLine" d="M174 96 Q179 63 205 45 M181 109 Q184 75 213 45 M239 111 Q242 77 220 47 M247 97 Q244 66 228 52 M176 126 Q171 150 181 177 M244 126 Q249 150 239 177"/>
         </g>
       </g>
-      <rect class="dataLines" x="35" y="20" width="250" height="520" fill="url(#cLines)" opacity=".13" mask="url(#cMask)"/>
     </svg>
   </div>
 </div>

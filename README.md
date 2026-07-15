@@ -21,9 +21,10 @@ Open **http://localhost:3000** in Chrome or Edge. No npm install is required.
 - **Public privacy boundary**: every note is present as a star, but the deployed deck
   exposes titles/text only for `wiki/builds/` and `wiki/learning/`. All other stars
   use anonymous stable IDs and say “local vault only.”
-- **CORE**: a full-body Cortana hologram replaces the old orb. She patrols, turns,
-  breathes, tracks the pointer, gestures, and reacts differently while listening,
-  processing, and speaking. Her projector remains Core-only.
+- **CORE**: a detailed articulated inline-SVG Cortana replaces the old orb and flat
+  image. Her head, mouth, arms, forearms, hands, fingers, and feet are separate; data
+  paths flow from feet to head; listening, thinking, normal speech, emphatic delivery,
+  and caring delivery use distinct poses. Her projector remains Core-only.
 - **Master Chief guard panel**: Galaxy includes the generated transparent armor asset
   and the mission line “Protect the mission. Protect the people. We finish the fight.”
 - **Source flight**: vault-backed answers light their source nodes and fly to the top
@@ -67,7 +68,8 @@ never enters the deployed file.
 ## Main files
 
 - `index.html` — Cortana hologram, chat, Vault/SYS/Ops, voice, and model/effort UI
-- `assets/cortana-hologram.png` — transparent 941×1672 Core avatar
+- `index.html` inline SVG — active articulated Core Cortana rig
+- `assets/cortana-hologram.png` — legacy unreferenced PNG archive
 - `assets/master-chief-panel-v2.png` — transparent 1024×1536 Galaxy guard panel
 - `galaxy.js` — graph rendering, camera flights, source cards, memory capture
 - `galaxy.css` — galaxy HUD, daytime rail, source panel, responsive layout
