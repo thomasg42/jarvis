@@ -123,49 +123,155 @@
     return new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffc8a0, size: .045, transparent: true, opacity: .48, depthWrite: false }));
   }
 
+  /* Inner habitable surface — matched to Installation 04 reference imagery:
+     an Earth-like strip of oceans, green/tan continents, glaciers and swirling
+     clouds, with the atmosphere shading into the retaining walls on both rims. */
+  function haloTerrainTexture() {
+    const W = 2048, H = 256;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    const sea = ctx.createLinearGradient(0, 0, 0, H);
+    sea.addColorStop(0, '#24333c'); sea.addColorStop(.16, '#1d4e68');
+    sea.addColorStop(.5, '#2a6e90'); sea.addColorStop(.84, '#1d4e68');
+    sea.addColorStop(1, '#24333c');
+    ctx.fillStyle = sea; ctx.fillRect(0, 0, W, H);
+    let s = 7;
+    const rnd = () => rand(s++);
+    const blob = (x, y, r, color, alpha) => {
+      const g = ctx.createRadialGradient(x, y, r * .12, x, y, r);
+      g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalAlpha = alpha; ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      ctx.globalAlpha = 1;
+    };
+    const LAND = ['#3e5d33', '#49683a', '#6b6b40', '#8a7a4e', '#57713d'];
+    for (let i = 0; i < 34; i++) { // continents: clusters of soft landmass blobs
+      const cx = rnd() * W, cy = 46 + rnd() * (H - 92), size = 34 + rnd() * 100;
+      const n = 12 + Math.floor(rnd() * 12);
+      for (let j = 0; j < n; j++) {
+        const px = cx + (rnd() - .5) * size * 2.2, py = cy + (rnd() - .5) * size * .8;
+        const pr = 9 + rnd() * size * .45;
+        const col = LAND[Math.floor(rnd() * LAND.length)];
+        const a = .62 + rnd() * .3;
+        for (const off of [-W, 0, W]) blob(px + off, py, pr, col, a);
+      }
+    }
+    for (let i = 0; i < 12; i++) { // glaciers hugging the rim walls
+      const px = rnd() * W, py = rnd() < .5 ? 30 + rnd() * 26 : H - 30 - rnd() * 26;
+      const pr = 10 + rnd() * 26;
+      for (const off of [-W, 0, W]) blob(px + off, py, pr, '#dbe7ee', .5);
+    }
+    for (let i = 0; i < 70; i++) { // cloud streaks
+      const px = rnd() * W, py = 22 + rnd() * (H - 44);
+      const len = 30 + rnd() * 130, th = 3 + rnd() * 7, a = (rnd() - .5) * .5;
+      ctx.globalAlpha = .12 + rnd() * .28;
+      ctx.fillStyle = '#f4f9ff';
+      for (const off of [-W, 0, W]) {
+        ctx.save(); ctx.translate(px + off, py); ctx.rotate(a);
+        ctx.beginPath(); ctx.ellipse(0, 0, len, th, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+    const atm = ctx.createLinearGradient(0, 0, 0, H); // rim-wall shadow + air glow
+    atm.addColorStop(0, 'rgba(18,23,29,.95)'); atm.addColorStop(.05, 'rgba(70,90,110,.55)');
+    atm.addColorStop(.14, 'rgba(140,190,235,.13)'); atm.addColorStop(.5, 'rgba(150,200,245,.03)');
+    atm.addColorStop(.86, 'rgba(140,190,235,.13)'); atm.addColorStop(.95, 'rgba(70,90,110,.55)');
+    atm.addColorStop(1, 'rgba(18,23,29,.95)');
+    ctx.fillStyle = atm; ctx.fillRect(0, 0, W, H);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  /* Outer hull — polished dark Forerunner metal: panel plates, seam grooves,
+     and the neat rows of blue running lights seen on the ring's exterior. */
+  function haloHullTexture() {
+    const W = 2048, H = 256;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    const base = ctx.createLinearGradient(0, 0, 0, H);
+    base.addColorStop(0, '#3a4048'); base.addColorStop(.5, '#23272d'); base.addColorStop(1, '#3a4048');
+    ctx.fillStyle = base; ctx.fillRect(0, 0, W, H);
+    let s = 999;
+    const rnd = () => rand(s++);
+    for (let i = 0; i < 170; i++) { // panel plates
+      const px = rnd() * W, py = rnd() * H, pw = 30 + rnd() * 120, ph = 14 + rnd() * 60;
+      ctx.globalAlpha = .1 + rnd() * .14;
+      ctx.fillStyle = rnd() < .5 ? '#181c21' : '#4a525c';
+      for (const off of [-W, 0, W]) ctx.fillRect(px + off, py, pw, ph);
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(8,10,13,.55)';
+    for (const y of [.16, .34, .5, .68, .86]) ctx.fillRect(0, y * H, W, 2); // long grooves
+    for (let i = 0; i < 46; i++) ctx.fillRect(Math.floor(rnd() * W), 0, 1.5, H); // vertical seams
+    for (const y of [.28 * H, .72 * H]) { // neatly arranged blue lights
+      for (let x = 16; x < W; x += 64) {
+        ctx.globalAlpha = .3; ctx.fillStyle = '#8fd8ff'; ctx.fillRect(x - 3, y - 3, 10, 9);
+        ctx.globalAlpha = .95; ctx.fillRect(x, y, 4, 3);
+      }
+    }
+    ctx.globalAlpha = 1;
+    const groove = ctx.createLinearGradient(0, H * .46, 0, H * .54); // glowing centerline
+    groove.addColorStop(0, 'rgba(120,200,255,0)'); groove.addColorStop(.5, 'rgba(120,200,255,.28)');
+    groove.addColorStop(1, 'rgba(120,200,255,0)');
+    ctx.fillStyle = groove; ctx.fillRect(0, H * .46, W, H * .08);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  /* The Ring itself — a real ringworld band instead of flat glowing circles:
+     habitable terrain on the inside of a cylinder, metal hull outside, rim
+     walls holding the atmosphere, sunlight raking across it, slow spin. */
   function buildHaloWorld() {
     const ring = new THREE.Group();
-    const band = new THREE.Mesh(
-      new THREE.RingGeometry(5.55, 6.18, 256, 1),
-      new THREE.MeshBasicMaterial({
-        color: 0x174d33, transparent: true, opacity: .2,
-        side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending,
+    const tilt = new THREE.Group();
+    tilt.rotation.x = Math.PI / 2; // cylinder axis -> the old ring's normal
+    const spinner = new THREE.Group();
+    tilt.add(spinner);
+    ring.add(tilt);
+
+    const R = 5.86, BAND = .62, HULL = .1;
+    const terrainTex = haloTerrainTexture();
+    const hullTex = haloHullTexture();
+    const terrain = new THREE.Mesh(
+      new THREE.CylinderGeometry(R, R, BAND - .05, 512, 1, true),
+      new THREE.MeshLambertMaterial({
+        map: terrainTex, side: THREE.BackSide,
+        emissive: 0xffffff, emissiveMap: terrainTex, emissiveIntensity: .52,
       })
     );
-    const innerEdge = new THREE.Mesh(
-      new THREE.TorusGeometry(5.55, .035, 8, 256),
-      new THREE.MeshBasicMaterial({ color: 0xffc42e, transparent: true, opacity: .72, depthWrite: false })
-    );
-    const outerEdge = new THREE.Mesh(
-      new THREE.TorusGeometry(6.18, .06, 8, 256),
-      new THREE.MeshBasicMaterial({ color: 0x54ffb0, transparent: true, opacity: .56, depthWrite: false })
-    );
-    const atmosphere = new THREE.Mesh(
-      new THREE.TorusGeometry(5.86, .48, 14, 256),
-      new THREE.MeshBasicMaterial({
-        color: 0x36ff9d, transparent: true, opacity: .035,
-        depthWrite: false, blending: THREE.AdditiveBlending,
+    const hull = new THREE.Mesh(
+      new THREE.CylinderGeometry(R + HULL, R + HULL, BAND, 512, 1, true),
+      new THREE.MeshLambertMaterial({
+        map: hullTex, emissive: 0xffffff, emissiveMap: hullTex, emissiveIntensity: .22,
       })
     );
-    const segments = new THREE.Group();
-    for (let i = 0; i < 96; i++) {
-      if (i % 7 === 0 || i % 11 === 0) continue;
-      const angle = (i / 96) * Math.PI * 2;
-      const radius = 5.86;
-      const marker = new THREE.Mesh(
-        new THREE.BoxGeometry(.16 + rand(i + 80) * .2, .018, .05 + rand(i + 110) * .14),
-        new THREE.MeshBasicMaterial({
-          color: i % 4 ? 0x4bd88f : 0xffc42e,
-          transparent: true, opacity: .16 + rand(i + 50) * .2, depthWrite: false,
-        })
-      );
-      marker.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, .02);
-      marker.rotation.z = angle;
-      segments.add(marker);
-    }
-    ring.add(atmosphere, band, segments, innerEdge, outerEdge);
-    ring.rotation.set(1.08, .08, -.28);
+    const wallMat = new THREE.MeshLambertMaterial({ color: 0x4a525c, emissive: 0x1c2126, side: THREE.DoubleSide });
+    const wallTop = new THREE.Mesh(new THREE.RingGeometry(R - .02, R + HULL, 512, 1), wallMat);
+    wallTop.rotation.x = -Math.PI / 2;
+    wallTop.position.y = BAND / 2;
+    const wallBot = wallTop.clone();
+    wallBot.position.y = -BAND / 2;
+    const atmo = new THREE.Mesh(
+      new THREE.CylinderGeometry(R - .07, R - .07, BAND * .8, 256, 1, true),
+      new THREE.MeshBasicMaterial({
+        color: 0x8fd0ff, transparent: true, opacity: .045, side: THREE.BackSide,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      })
+    );
+    spinner.add(terrain, hull, wallTop, wallBot, atmo);
+
+    const sun = new THREE.DirectionalLight(0xfff1d8, 1.25); // only the ring is lit
+    sun.position.set(-7, 9, 6);
+    const fill = new THREE.AmbientLight(0x35424f, .9);
+    ring.add(sun, fill);
+
+    ring.rotation.set(.98, .08, -.28);
     ring.position.set(0, -.15, -1.55);
+    ring.userData.spinner = spinner;
     return ring;
   }
 
@@ -426,6 +532,7 @@
 
   window.jarvisGalaxyTick = () => {
     if (!galaxy || !window.jarvisGalaxyActive) return;
+    if (haloWorld && haloWorld.userData.spinner) haloWorld.userData.spinner.rotation.y += .0006;
     const idleFor = Date.now() - lastInteraction;
     if (!dragging && idleFor > 3500) galaxy.rotation.y += .00034;
     if (!dragging && idleFor > 9500) {

@@ -62,8 +62,8 @@
     box-shadow: 0 0 10px rgba(110,216,255,.8);
     opacity: .24; animation: cortanaScan 4.2s linear infinite;
   }
-  #cortanaAvatar img {
-    position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain;
+  #cortanaAvatar .holoFigure {
+    position: relative; z-index: 1; width: 100%; height: 100%;
     filter: drop-shadow(0 0 8px rgba(110,216,255,.62)) drop-shadow(0 0 24px var(--avatar-glow));
     transform-origin: 50% 82%; animation: cortanaFloat 4.8s ease-in-out infinite;
     will-change: transform, filter, opacity;
@@ -71,15 +71,15 @@
   #cortanaAvatar.state-listening {
     --avatar-glow: rgba(255,196,46,.62); --avatar-core: rgba(255,226,122,.25);
   }
-  #cortanaAvatar.state-listening img { animation: cortanaListen 1.1s ease-in-out infinite; }
+  #cortanaAvatar.state-listening .holoFigure { animation: cortanaListen 1.1s ease-in-out infinite; }
   #cortanaAvatar.state-thinking {
     --avatar-glow: rgba(255,196,46,.72); --avatar-core: rgba(255,225,77,.3);
   }
-  #cortanaAvatar.state-thinking img { animation: cortanaThink 1.65s ease-in-out infinite; }
+  #cortanaAvatar.state-thinking .holoFigure { animation: cortanaThink 1.65s ease-in-out infinite; }
   #cortanaAvatar.state-speaking {
     --avatar-glow: rgba(75,255,168,.75); --avatar-core: rgba(140,255,200,.34);
   }
-  #cortanaAvatar.state-speaking img { animation: cortanaSpeak .72s ease-in-out infinite; }
+  #cortanaAvatar.state-speaking .holoFigure { animation: cortanaSpeak .72s ease-in-out infinite; }
   @keyframes cortanaPatrol {
     0%, 100% { transform: translate3d(calc(var(--look-x) - 28px), var(--look-y), 0) rotateY(7deg); }
     25% { transform: translate3d(var(--look-x), calc(var(--look-y) - 4px), 10px) rotateY(-1deg); }
@@ -112,6 +112,106 @@
   }
   @keyframes cortanaScan { from { top: 13%; opacity: 0; } 12% { opacity: .26; } 88% { opacity: .18; } to { top: 91%; opacity: 0; } }
   @keyframes avatarAura { 0%,100% { transform: translate(-50%,-50%) scale(.96); opacity: .56; } 50% { transform: translate(-50%,-50%) scale(1.05); opacity: .82; } }
+
+  /* ===== Cortana articulated rig — arms, head, eyes, mouth =====
+     The figure is an inline SVG; every joint is a group with a view-box
+     pivot so the limbs actually swing instead of the whole image sliding.
+     Feet stay planted. While speaking, tone classes (read from the reply)
+     choose the body language: tone-emphatic = yelling drive, tone-caring
+     = soft hands-to-heart. */
+  #cortanaAvatar .armR, #cortanaAvatar .armL,
+  #cortanaAvatar .forearmR, #cortanaAvatar .forearmL,
+  #cortanaAvatar .headGroup, #cortanaAvatar .torsoGroup,
+  #cortanaAvatar .mouthOpen, #cortanaAvatar .lipLine, #cortanaAvatar .lipSmile {
+    transform-box: view-box; will-change: transform;
+  }
+  #cortanaAvatar .eye { transform-box: fill-box; transform-origin: 50% 50%; animation: cBlink 4.6s infinite; }
+  #cortanaAvatar .armR { transform-origin: 116px 158px; animation: cArmIdleR 6.4s ease-in-out infinite; }
+  #cortanaAvatar .armL { transform-origin: 204px 158px; animation: cArmIdleL 7.2s ease-in-out infinite; }
+  #cortanaAvatar .forearmR { transform-origin: 114px 236px; animation: cForeIdleR 6.4s ease-in-out infinite; }
+  #cortanaAvatar .forearmL { transform-origin: 206px 236px; animation: cForeIdleL 7.2s ease-in-out infinite; }
+  #cortanaAvatar .headGroup { transform-origin: 160px 130px; animation: cHeadIdle 8.4s ease-in-out infinite; }
+  #cortanaAvatar .torsoGroup { transform-origin: 160px 302px; animation: cBreathe 4.8s ease-in-out infinite; }
+  #cortanaAvatar .mouthOpen { transform-origin: 160px 111px; transform: scale(.9, .12); }
+  #cortanaAvatar .lipLine, #cortanaAvatar .lipSmile { transform-origin: 160px 111px; transition: opacity .3s; }
+  #cortanaAvatar .lipSmile { opacity: 0; }
+  #cortanaAvatar .acc { fill: none; stroke: #cfe2ff; stroke-width: 1; opacity: .3; }
+  #cortanaAvatar .brow { fill: none; stroke: #22307f; stroke-width: 1.6; stroke-linecap: round; }
+  @keyframes cBreathe { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.012,1.022) translateY(-1.2px); } }
+  @keyframes cHeadIdle { 0%,100% { transform: rotate(-1.2deg); } 42% { transform: rotate(1.6deg); } 74% { transform: rotate(.3deg); } }
+  @keyframes cBlink { 0%,91.5%,95.5%,100% { transform: scaleY(1); } 93.5% { transform: scaleY(.06); } }
+  @keyframes cArmIdleR { 0%,100% { transform: rotate(3deg); } 50% { transform: rotate(-5deg); } }
+  @keyframes cArmIdleL { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(5deg); } }
+  @keyframes cForeIdleR { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(-16deg); } }
+  @keyframes cForeIdleL { 0%,100% { transform: rotate(4deg); } 50% { transform: rotate(16deg); } }
+
+  /* Listening — leans in, hands drift forward, attentive */
+  #cortanaAvatar.state-listening .armR { animation: cArmListenR 2.8s ease-in-out infinite; }
+  #cortanaAvatar.state-listening .armL { animation: cArmListenL 2.8s ease-in-out infinite; }
+  #cortanaAvatar.state-listening .forearmR { animation: cForeListenR 2.8s ease-in-out infinite; }
+  #cortanaAvatar.state-listening .forearmL { animation: cForeListenL 2.8s ease-in-out infinite; }
+  #cortanaAvatar.state-listening .headGroup { animation: cHeadListen 2.8s ease-in-out infinite; }
+  @keyframes cArmListenR { 0%,100% { transform: rotate(7deg); } 50% { transform: rotate(11deg); } }
+  @keyframes cArmListenL { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(-11deg); } }
+  @keyframes cForeListenR { 0%,100% { transform: rotate(-26deg); } 50% { transform: rotate(-34deg); } }
+  @keyframes cForeListenL { 0%,100% { transform: rotate(26deg); } 50% { transform: rotate(34deg); } }
+  @keyframes cHeadListen { 0%,100% { transform: rotate(2.6deg) translateY(1px); } 50% { transform: rotate(3.4deg) translateY(2px); } }
+
+  /* Thinking — hand to chin, other arm folded across the waist */
+  #cortanaAvatar.state-thinking .armR { animation: cArmThinkR 2.4s ease-in-out infinite; }
+  #cortanaAvatar.state-thinking .forearmR { animation: cForeThinkR 2.4s ease-in-out infinite; }
+  #cortanaAvatar.state-thinking .armL { animation: cArmThinkL 2.4s ease-in-out infinite; }
+  #cortanaAvatar.state-thinking .forearmL { animation: cForeThinkL 2.4s ease-in-out infinite; }
+  #cortanaAvatar.state-thinking .headGroup { animation: cHeadThink 2.4s ease-in-out infinite; }
+  @keyframes cArmThinkR { 0%,100% { transform: rotate(17deg); } 50% { transform: rotate(19deg); } }
+  @keyframes cForeThinkR { 0%,100% { transform: rotate(-136deg); } 50% { transform: rotate(-143deg); } }
+  @keyframes cArmThinkL { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(-11deg); } }
+  @keyframes cForeThinkL { 0%,100% { transform: rotate(64deg); } 50% { transform: rotate(70deg); } }
+  @keyframes cHeadThink { 0%,100% { transform: rotate(-3.4deg); } 50% { transform: rotate(-4.6deg); } }
+
+  /* Speaking — conversational gesturing; arms trade beats, mouth talks */
+  #cortanaAvatar.state-speaking .armR { animation: cArmTalkR 2.1s ease-in-out infinite; }
+  #cortanaAvatar.state-speaking .forearmR { animation: cForeTalkR 2.1s ease-in-out infinite; }
+  #cortanaAvatar.state-speaking .armL { animation: cArmTalkL 2.7s ease-in-out infinite; animation-delay: -1.1s; }
+  #cortanaAvatar.state-speaking .forearmL { animation: cForeTalkL 2.7s ease-in-out infinite; animation-delay: -1.1s; }
+  #cortanaAvatar.state-speaking .headGroup { animation: cHeadTalk 2.1s ease-in-out infinite; }
+  #cortanaAvatar.state-speaking .mouthOpen { animation: cMouthTalk .34s ease-in-out infinite alternate; }
+  #cortanaAvatar.state-speaking .lipLine { opacity: 0; }
+  @keyframes cArmTalkR { 0%,100% { transform: rotate(5deg); } 32% { transform: rotate(22deg); } 64% { transform: rotate(-9deg); } }
+  @keyframes cForeTalkR { 0%,100% { transform: rotate(-34deg); } 32% { transform: rotate(-88deg); } 64% { transform: rotate(-50deg); } }
+  @keyframes cArmTalkL { 0%,100% { transform: rotate(-5deg); } 36% { transform: rotate(-22deg); } 68% { transform: rotate(9deg); } }
+  @keyframes cForeTalkL { 0%,100% { transform: rotate(34deg); } 36% { transform: rotate(88deg); } 68% { transform: rotate(50deg); } }
+  @keyframes cHeadTalk { 0%,100% { transform: rotate(1deg); } 45% { transform: rotate(-1.6deg) translateY(-1px); } }
+  @keyframes cMouthTalk { from { transform: scale(.9, .22); } to { transform: scale(1.05, 1); } }
+
+  /* Yelling — fast punches, wide-open mouth, head thrown into it */
+  #cortanaAvatar.tone-emphatic .armR { animation: cArmYellR .92s ease-in-out infinite; }
+  #cortanaAvatar.tone-emphatic .forearmR { animation: cForeYellR .92s ease-in-out infinite; }
+  #cortanaAvatar.tone-emphatic .armL { animation: cArmYellL .92s ease-in-out infinite; animation-delay: -.46s; }
+  #cortanaAvatar.tone-emphatic .forearmL { animation: cForeYellL .92s ease-in-out infinite; animation-delay: -.46s; }
+  #cortanaAvatar.tone-emphatic .headGroup { animation: cHeadYell .46s ease-in-out infinite; }
+  #cortanaAvatar.tone-emphatic .mouthOpen { animation: cMouthYell .23s ease-in-out infinite alternate; }
+  @keyframes cArmYellR { 0%,100% { transform: rotate(28deg); } 50% { transform: rotate(6deg); } }
+  @keyframes cForeYellR { 0%,100% { transform: rotate(118deg); } 50% { transform: rotate(46deg); } }
+  @keyframes cArmYellL { 0%,100% { transform: rotate(-28deg); } 50% { transform: rotate(-6deg); } }
+  @keyframes cForeYellL { 0%,100% { transform: rotate(-118deg); } 50% { transform: rotate(-46deg); } }
+  @keyframes cHeadYell { 0%,100% { transform: rotate(0deg) translateY(0); } 50% { transform: rotate(-1.2deg) translateY(2.4px); } }
+  @keyframes cMouthYell { from { transform: scale(1, .4); } to { transform: scale(1.32, 1.5); } }
+
+  /* Caring — slow, hands drawn toward the heart, soft head tilt, smile */
+  #cortanaAvatar.tone-caring .armR { animation: cArmCareR 3.6s ease-in-out infinite; }
+  #cortanaAvatar.tone-caring .forearmR { animation: cForeCareR 3.6s ease-in-out infinite; }
+  #cortanaAvatar.tone-caring .armL { animation: cArmCareL 3.6s ease-in-out infinite; animation-delay: -.5s; }
+  #cortanaAvatar.tone-caring .forearmL { animation: cForeCareL 3.6s ease-in-out infinite; animation-delay: -.5s; }
+  #cortanaAvatar.tone-caring .headGroup { animation: cHeadCare 3.6s ease-in-out infinite; }
+  #cortanaAvatar.tone-caring .mouthOpen { animation: cMouthCare .5s ease-in-out infinite alternate; }
+  #cortanaAvatar.tone-caring .lipSmile { opacity: .85; }
+  @keyframes cArmCareR { 0%,100% { transform: rotate(10deg); } 50% { transform: rotate(16deg); } }
+  @keyframes cForeCareR { 0%,100% { transform: rotate(-86deg); } 50% { transform: rotate(-102deg); } }
+  @keyframes cArmCareL { 0%,100% { transform: rotate(-10deg); } 50% { transform: rotate(-16deg); } }
+  @keyframes cForeCareL { 0%,100% { transform: rotate(86deg); } 50% { transform: rotate(102deg); } }
+  @keyframes cHeadCare { 0%,100% { transform: rotate(3.4deg); } 50% { transform: rotate(4.8deg) translateY(1px); } }
+  @keyframes cMouthCare { from { transform: scale(.85, .18); } to { transform: scale(.98, .62); } }
 
   /* ===== Hologram projector rig ===== */
   #scanlines {
@@ -479,7 +579,85 @@
 <div id="beam"></div>
 <div id="projBase"></div>
 <div id="cortanaAvatar" class="state-idle" aria-hidden="true">
-  <div class="cortanaBody"><img src="assets/cortana-hologram.png" alt="" /></div>
+  <div class="cortanaBody">
+    <!-- Articulated Cortana hologram: feet planted, shoulder/elbow/head/mouth
+         joints animate per state. Replaces the flat PNG render. -->
+    <svg class="holoFigure" viewBox="0 0 320 540" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <defs>
+        <!-- userSpaceOnUse: one continuous light falloff across every body
+             part so the shoulder/elbow joint caps blend invisibly -->
+        <linearGradient id="cSkin" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="530">
+          <stop offset="0" stop-color="#b7d2ff"/><stop offset=".45" stop-color="#6d8bf6"/><stop offset="1" stop-color="#33489f"/>
+        </linearGradient>
+        <linearGradient id="cSkinSide" gradientUnits="userSpaceOnUse" x1="96" y1="0" x2="224" y2="0">
+          <stop offset="0" stop-color="#a3bfff"/><stop offset=".55" stop-color="#5f7ae8"/><stop offset="1" stop-color="#34499f"/>
+        </linearGradient>
+        <linearGradient id="cHair" gradientUnits="userSpaceOnUse" x1="0" y1="34" x2="0" y2="140">
+          <stop offset="0" stop-color="#33409f"/><stop offset="1" stop-color="#10195a"/>
+        </linearGradient>
+        <pattern id="cLines" width="7" height="5" patternUnits="userSpaceOnUse">
+          <rect y="3.4" width="7" height="1.1" fill="#d5e4ff"/>
+          <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="0 5" dur="1.5s" repeatCount="indefinite"/>
+        </pattern>
+        <radialGradient id="cFade" cx=".5" cy=".5" r=".5">
+          <stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/>
+        </radialGradient>
+        <mask id="cMask"><ellipse cx="160" cy="290" rx="125" ry="250" fill="url(#cFade)"/></mask>
+      </defs>
+      <g class="figureRoot">
+        <g class="legs">
+          <path fill="url(#cSkinSide)" d="M129 292 C123 366 133 448 141 514 L159 514 C157 448 155 368 157 294 Z"/>
+          <path fill="url(#cSkinSide)" d="M191 292 C197 366 187 448 179 514 L161 514 C163 448 165 368 163 294 Z"/>
+          <path fill="#3d55c8" d="M137 512 C134 522 138 528 148 528 L158 528 L159 514 L141 514 Z"/>
+          <path fill="#3d55c8" d="M183 512 C186 522 182 528 172 528 L162 528 L161 514 L179 514 Z"/>
+          <ellipse cx="146" cy="402" rx="5" ry="96" fill="#dfe9ff" opacity=".1"/>
+          <ellipse cx="174" cy="402" rx="5" ry="96" fill="#dfe9ff" opacity=".1"/>
+        </g>
+        <g class="torsoGroup">
+          <path fill="url(#cSkin)" d="M132 146 C112 152 106 168 112 188 C118 208 124 222 134 236 C118 254 112 274 115 294 C117 308 132 312 160 312 C188 312 203 308 205 294 C208 274 202 254 186 236 C196 222 202 208 208 188 C214 168 208 152 188 146 C169 141 151 141 132 146 Z"/>
+          <ellipse cx="160" cy="212" rx="17" ry="66" fill="#e2ebff" opacity=".13"/>
+          <path class="acc" d="M138 162 C150 170 170 170 182 162"/>
+          <path class="acc" d="M136 246 C148 254 172 254 184 246"/>
+          <path class="acc" d="M160 150 L160 234"/>
+        </g>
+        <g class="arm armR">
+          <circle cx="117" cy="159" r="10" fill="url(#cSkinSide)"/>
+          <path fill="url(#cSkinSide)" d="M124 150 C110 151 103 161 103 172 C103 184 106 214 108 234 C109 242 120 242 121 234 C123 214 127 184 127 170 C127 159 129 152 124 150 Z"/>
+          <g class="forearm forearmR">
+            <circle cx="114" cy="236" r="6.5" fill="url(#cSkinSide)"/>
+            <path fill="url(#cSkinSide)" d="M108 232 C105 240 105 252 107 264 L111 298 C112 306 120 306 120 298 L122 260 C123 248 122 238 121 232 C117 238 112 238 108 232 Z"/>
+            <ellipse class="hand" cx="115" cy="306" rx="6.5" ry="10.5" fill="url(#cSkinSide)"/>
+          </g>
+        </g>
+        <g class="arm armL">
+          <circle cx="203" cy="159" r="10" fill="url(#cSkinSide)"/>
+          <path fill="url(#cSkinSide)" d="M196 150 C210 151 217 161 217 172 C217 184 214 214 212 234 C211 242 200 242 199 234 C197 214 193 184 193 170 C193 159 191 152 196 150 Z"/>
+          <g class="forearm forearmL">
+            <circle cx="206" cy="236" r="6.5" fill="url(#cSkinSide)"/>
+            <path fill="url(#cSkinSide)" d="M212 232 C215 240 215 252 213 264 L209 298 C208 306 200 306 200 298 L198 260 C197 248 198 238 199 232 C203 238 208 238 212 232 Z"/>
+            <ellipse class="hand" cx="205" cy="306" rx="6.5" ry="10.5" fill="url(#cSkinSide)"/>
+          </g>
+        </g>
+        <g class="headGroup">
+          <path fill="#4a5fd0" d="M149 112 L171 112 L173 142 C166 149 154 149 147 142 Z"/>
+          <path fill="url(#cHair)" d="M126 92 C120 48 138 32 160 32 C182 32 200 48 194 92 C193 110 187 124 179 132 C183 114 183 98 180 84 L140 84 C137 98 137 114 141 132 C133 124 127 110 126 92 Z"/>
+          <path fill="url(#cSkin)" d="M136 86 C136 62 146 50 160 50 C174 50 184 62 184 86 C184 106 173 124 160 124 C147 124 136 106 136 86 Z"/>
+          <path fill="url(#cHair)" d="M134 84 C134 54 146 42 160 42 C174 42 186 54 186 84 C186 88 184 90 183 86 C181 74 176 67 168 64 C157 72 144 72 138 84 C136 88 134 88 134 84 Z"/>
+          <path class="brow" d="M143 83 Q149 79.5 155 82.5"/>
+          <path class="brow" d="M165 82.5 Q171 79.5 177 83"/>
+          <g class="eye"><ellipse cx="149" cy="90" rx="4.8" ry="2.7" fill="#dceafe"/><circle cx="149.5" cy="90.2" r="1.8" fill="#0e1a4e"/></g>
+          <g class="eye"><ellipse cx="171" cy="90" rx="4.8" ry="2.7" fill="#dceafe"/><circle cx="170.5" cy="90.2" r="1.8" fill="#0e1a4e"/></g>
+          <path d="M160 95 L158.8 102 L161.2 102" fill="none" stroke="#31449f" stroke-width="1" opacity=".55"/>
+          <g class="mouth">
+            <ellipse class="mouthOpen" cx="160" cy="111" rx="8" ry="5" fill="#0d1846"/>
+            <path class="lipLine" d="M152 111 Q160 114 168 111" stroke="#25348a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+            <path class="lipSmile" d="M151 109 Q160 116 169 109" stroke="#2c3f9e" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+      <rect class="dataLines" x="35" y="20" width="250" height="520" fill="url(#cLines)" opacity=".13" mask="url(#cMask)"/>
+    </svg>
+  </div>
 </div>
 <aside id="chiefPanel" aria-label="Master Chief mission statement">
   <img src="assets/master-chief-panel-v2.png" alt="Master Chief standing guard" />
@@ -1025,6 +1203,18 @@ function setState(name) {
   }
 }
 
+/* Pick Cortana's speaking body language from the reply text: shouty replies
+   (caps / stacked exclamations) get the emphatic yell drive, everything else
+   gets the soft caring gestures. setState() wipes the class when she stops. */
+function setSpeakingTone(text) {
+  const avatar = document.getElementById('cortanaAvatar');
+  if (!avatar) return;
+  const t = String(text || '').replace(/\b(UNSC|CTN|FGA|CRM|GHL|API|HTTP|URL|README|TTS|AI)\b/g, '');
+  const bangs = (t.match(/!/g) || []).length;
+  const shouting = /\b[A-Z]{4,}\b/.test(t) || bangs >= 2;
+  avatar.classList.add(shouting ? 'tone-emphatic' : 'tone-caring');
+}
+
 function initCortanaMotion() {
   const avatar = document.getElementById('cortanaAvatar');
   const body = avatar && avatar.querySelector('.cortanaBody');
@@ -1306,6 +1496,7 @@ async function sendMessage(text) {
     if (!res.ok) throw new Error(raw || res.statusText);
     const data = JSON.parse(raw);
     setState('speaking');
+    setSpeakingTone(data.reply);
     addMsg(data.reply, 'jarvis', data.routing);
     if (window.jarvisTraceSources) window.jarvisTraceSources(data.sources || []);
     speak(data.reply);
