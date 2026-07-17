@@ -650,7 +650,8 @@
 <div id="projBase"></div>
 <div id="cortanaAvatar" class="state-idle" data-viseme="rest" aria-hidden="true">
   <div class="cortanaBody">
-    <!-- The high-detail Halo 4 rig is loaded from a reusable SVG asset. -->
+    <!-- Core visual is the static cortana-hologram.png until the 3D GLB model is ready.
+         The articulated SVG rig below is kept only as a load-failure fallback. -->
     <div class="rigMount" aria-hidden="true"></div>
     <svg class="holoFigure legacyFigure" viewBox="0 0 420 720" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
       <defs>
@@ -1358,19 +1359,20 @@ async function loadCortanaRig() {
   const avatar = document.getElementById('cortanaAvatar');
   const mount = avatar && avatar.querySelector('.rigMount');
   if (!mount) return;
-  try {
-    const response = await fetch('assets/cortana-h4-rig.svg?v=20260715-h5real');
-    if (!response.ok) throw new Error(`rig ${response.status}`);
-    const source = await response.text();
-    const doc = new DOMParser().parseFromString(source, 'image/svg+xml');
-    const svg = doc.documentElement;
-    if (svg.nodeName.toLowerCase() !== 'svg' || doc.querySelector('parsererror')) throw new Error('invalid SVG');
-    mount.replaceChildren(document.importNode(svg, true));
-  } catch (err) {
-    console.warn('Detailed Cortana rig unavailable; using embedded fallback:', err.message);
+  const img = document.createElement('img');
+  img.className = 'holoFigure';
+  img.alt = '';
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'contain';
+  img.style.objectPosition = 'bottom';
+  img.onerror = () => {
+    console.warn('Cortana hologram image unavailable; using embedded fallback');
     const fallback = avatar.querySelector('.legacyFigure');
     if (fallback) fallback.style.display = 'block';
-  }
+  };
+  img.src = 'assets/cortana-hologram.png';
+  mount.replaceChildren(img);
 }
 
 let lipSyncTimer = null;
